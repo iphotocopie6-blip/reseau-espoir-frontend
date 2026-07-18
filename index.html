@@ -1,20 +1,78 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>RESEAU ESPOIR CITOYEN</title><script src="https://unpkg.com/react@18/umd/react.development.js"></script><script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script><script src="https://unpkg.com/@babel/standalone/babel.min.js"></script><style>body{margin:0;font-family:sans-serif;background:#f1f5f9}</style></head><body><div id="root"></div><script type="text/babel">
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RESEAU ESPOIR CITOYEN - Côte d'Ivoire</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
+<style>body{font-family:'Plus Jakarta Sans',sans-serif}</style>
+</head>
+<body class="bg-[#f6f7f9]"><div id="root"></div>
+<script type="text/babel">
 const API="https://reseau-espoir-backend.onrender.com";
 function App(){
   const [view,setView]=React.useState("home");
-  const [status,setStatus]=React.useState("Connexion...");
+  const [status,setStatus]=React.useState("Chargement...");
   const [text,setText]=React.useState(""); const [liste,setListe]=React.useState([]);
   const [pass,setPass]=React.useState(""); const [isAdmin,setIsAdmin]=React.useState(localStorage.getItem("admin")==="1");
-  React.useEffect(()=>{fetch(API).then(r=>r.json()).then(d=>setStatus(d.message+" "+(d.db||""))).catch(()=>setStatus("Hors ligne"));
-    load();},[]);
-  const load=()=>{fetch(API+"?signalements").then(r=>r.json()).then(d=>{if(Array.isArray(d)) setListe(d)}).catch(()=>{})};
-  const envoyer=()=>{if(!text.trim()) return; fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})}).then(r=>r.json()).then(res=>{if(res.all) setListe(res.all)}); setText(""); setTimeout(load,500);};
+  React.useEffect(()=>{fetch(API).then(r=>r.json()).then(d=>setStatus(d.db||"En ligne")).catch(()=>setStatus("Hors ligne")); load();},[]);
+  const load=()=>fetch(API+"?signalements").then(r=>r.json()).then(d=>{if(Array.isArray(d)) setListe(d)});
+  const envoyer=()=>{if(!text.trim()) return; fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})}).then(r=>r.json()).then(res=>{if(res.all) setListe(res.all); setText("");});};
   const login=()=>{fetch(API+"?login",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pass})}).then(r=>r.json()).then(res=>{if(res.status==="ok"){localStorage.setItem("admin","1"); setIsAdmin(true); setView("admin"); load();} else alert("Mot de passe incorrect");});};
-  const del=(id)=>{if(!confirm("Supprimer ce signalement ?")) return; fetch(API+"?delete",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id, token:"admin_ok", password:pass})}).then(()=>load());};
+  const del=(id)=>{if(!confirm("Supprimer définitivement?")) return; fetch(API+"?delete",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load());};
   const logout=()=>{localStorage.removeItem("admin"); setIsAdmin(false); setView("home");};
-  if(view==="login") return(<div style={{minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',padding:20}}><div style={{background:'white',padding:40,borderRadius:20,width:350,boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}}><h2>🔐 Admin Login</h2><input type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="Mot de passe" style={{width:'100%',padding:12,borderRadius:10,border:'1px solid #ccc',marginTop:15}}/><button onClick={login} style={{width:'100%',marginTop:15,padding:12,background:'#0f172a',color:'white',border:'none',borderRadius:10,fontWeight:700}}>Se connecter</button><button onClick={()=>setView("home")} style={{width:'100%',marginTop:10,padding:10,background:'#e2e8f0',border:'none',borderRadius:10}}>Retour</button></div></div>);
-  if(view==="admin" && isAdmin) return(<div style={{minHeight:'100vh',padding:20}}><div style={{maxWidth:800,margin:'0 auto',background:'white',borderRadius:20,padding:25}}><div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}><h2>👑 Tableau Admin - {liste.length} signalements</h2><div><button onClick={load} style={{padding:8,marginRight:10}}>🔄</button><button onClick={logout} style={{padding:8,background:'#ef4444',color:'white',border:'none',borderRadius:8}}>Déconnexion</button></div></div><div style={{marginTop:20}}>{liste.map(s=><div key={s.id} style={{display:'flex',justifyContent:'space-between',padding:12,borderBottom:'1px solid #f1f5f9'}}><div><b>{s.date}</b><br/>{s.text}</div><button onClick={()=>del(s.id)} style={{background:'#fee2e2',color:'#dc2626',border:'none',borderRadius:8,padding:'6px 12px',height:30}}>Supprimer</button></div>)}</div><button onClick={()=>setView("home")} style={{marginTop:20,padding:10}}>← Retour site</button></div></div>);
-  return(<div style={{minHeight:'100vh',padding:20}}><div style={{maxWidth:600,margin:'0 auto',background:'white',borderRadius:20,padding:30,boxShadow:'0 10px 30px rgba(0,0,0,0.1)'}}><div style={{display:'flex',justifyContent:'space-between'}}><h1 style={{color:'#0f172a',fontSize:22,fontWeight:800}}>RESEAU ESPOIR CITOYEN</h1><button onClick={()=>isAdmin?setView("admin"):setView("login")} style={{height:35,padding:'0 12px',borderRadius:20,border:'1px solid #cbd5e1',background:isAdmin?'#dcfce7':'white'}}>{isAdmin?'👑 Admin':'🔐 Admin'}</button></div><div style={{background:'#dcfce7',color:'#166534',padding:'8px 16px',borderRadius:20,fontSize:12,fontWeight:700,display:'inline-block',marginTop:10}}>{status}</div><div style={{marginTop:25}}><h3>🚨 Faire un signalement</h3><textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Ex: Route dégradée à Cocody..." style={{width:'100%',height:100,padding:15,borderRadius:12,border:'1px solid #cbd5e1',marginTop:10}}></textarea><button onClick={envoyer} style={{width:'100%',marginTop:12,padding:14,background:'#0f172a',color:'white',border:'none',borderRadius:12,fontWeight:700}}>Envoyer</button></div><div style={{marginTop:25}}><h3>📋 Signalements ({liste.length})</h3>{liste.map((s,i)=><div key={s.id||i} style={{background:'#f8fafc',padding:12,borderRadius:10,marginTop:8,borderLeft:'4px solid #16a34a'}}><div style={{fontSize:12,color:'#64748b'}}>{s.date}</div>{s.text}</div>)}</div></div></div>);
+
+  const Logo = () => (
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center text-white font-extrabold text-xl shadow-lg">RE</div>
+      <div class="leading-none"><div class="font-extrabold text- tracking-tight text-slate-900">RESEAU ESPOIR</div><div class="font-extrabold text- -mt-1 text-orange-500">CITOYEN</div><div class="text- tracking-[0.2em] text-slate-500 font-bold">CÔTE D'IVOIRE</div></div>
+    </div>
+  );
+
+  if(view==="login") return(
+    <div class="min-h-screen flex items-center justify-center p-6 bg-slate-900">
+      <div class="bg-white p-8 rounded- w-full max-w-sm shadow-2xl">
+        <Logo/><h2 class="mt-6 font-extrabold text-xl">Accès Administration</h2>
+        <input type="password" value={pass} onChange={e=>setPass(e.target.value)} placeholder="Mot de passe" class="w-full mt-5 p-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-orange-500"/>
+        <button onClick={login} class="w-full mt-4 p-4 rounded-xl bg-slate-900 text-white font-bold">Se connecter</button>
+        <button onClick={()=>setView("home")} class="w-full mt-3 p-3 rounded-xl bg-slate-100">Retour</button>
+      </div>
+    </div>
+  );
+
+  if(view==="admin" && isAdmin) return(
+    <div class="min-h-screen p-4 md:p-8 bg-slate-50"><div class="max-w-4xl mx-auto">
+      <div class="bg-white rounded- p-6 shadow-sm flex justify-between items-center"><Logo/><div class="flex gap-2"><button onClick={load} class="px-4 py-2 rounded-xl bg-slate-100 font-bold">↻</button><button onClick={logout} class="px-4 py-2 rounded-xl bg-red-500 text-white font-bold">Déconnexion</button></div></div>
+      <div class="mt-6 grid grid-cols-3 gap-4"><div class="bg-white p-5 rounded-2xl shadow-sm"><div class="text-slate-500 text-xs font-bold">TOTAL</div><div class="text-3xl font-extrabold">{liste.length}</div></div><div class="bg-slate-900 text-white p-5 rounded-2xl"><div class="text-white/60 text-xs font-bold">BASE</div><div class="font-bold text-sm mt-1">{status}</div></div><div class="bg-orange-500 text-white p-5 rounded-2xl"><div class="text-white/80 text-xs font-bold">VILLE</div><div class="font-bold">Abidjan</div></div></div>
+      <div class="mt-6 bg-white rounded- p-6 shadow-sm"><h2 class="font-extrabold text-lg">👑 Tableau Admin - {liste.length} signalements</h2><div class="mt-4 divide-y">{liste.map(s=><div key={s.id} class="py-4 flex justify-between"><div><div class="text-xs font-bold text-slate-400">{s.date}</div><div class="font-semibold mt-1">{s.text}</div></div><button onClick={()=>del(s.id)} class="self-start px-3 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-bold">Supprimer</button></div>)}</div><button onClick={()=>setView("home")} class="mt-6 px-4 py-2 rounded-xl bg-slate-100 font-bold">← Retour site</button></div>
+    </div></div>
+  );
+
+  return(
+    <div class="min-h-screen">
+      <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-slate-100"><div class="max-w-6xl mx-auto px-6 h- flex items-center justify-between"><Logo/><div class="flex items-center gap-3"><span class="hidden md:flex text-xs font-bold px-3 py-1.5 rounded-full bg-green-50 text-green-700 border border-green-200">● {status}</span><button onClick={()=>isAdmin?setView("admin"):setView("login")} class={`px-4 py-2 rounded-full font-bold text-sm border ${isAdmin?'bg-green-600 text-white border-green-600':'bg-white text-slate-700'}`}>{isAdmin?'👑 Admin':'🔐 Admin'}</button></div></div></header>
+      <main class="max-w-6xl mx-auto px-6 py-8 grid md:grid-cols-[1.1fr_1.6fr] gap-6">
+        <div class="space-y-6">
+          <div class="bg-slate-900 rounded- p-7 text-white relative overflow-hidden"><div class="absolute -right-10 -top-10 w-40 h-40 bg-orange-500 rounded-full blur-3xl opacity-30"></div><h1 class="text-3xl font-extrabold leading-tight">L'espoir passe par l'action citoyenne.</h1><p class="mt-3 text-white/70 text-sm leading-relaxed">Signalez les problèmes de votre quartier à Abidjan. Votre voix est enregistrée à vie dans notre base sécurisée.</p><div class="mt-5 flex gap-2"><div class="px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold">🇨🇮 100% Ivoirien</div><div class="px-3 py-1.5 rounded-full bg-orange-500 text-xs font-bold">A VIE ✅</div></div></div>
+          <div class="bg-white rounded- p-6 shadow-sm border border-slate-100">
+            <h3 class="font-extrabold flex items-center gap-2">🚨 Faire un signalement</h3>
+            <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Ex: Nid de poule dangereux devant le lycée technique Cocody..." class="w-full mt-4 h-28 p-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-2 focus:ring-orange-500 text-sm"></textarea>
+            <button onClick={envoyer} class="w-full mt-4 p-4 rounded-2xl bg-slate-900 text-white font-extrabold hover:bg-black transition">Envoyer mon signalement →</button>
+            <div class="mt-3 text- text-slate-400 font-bold text-center">SÉCURISÉ • ANONYME • STOCKÉ À VIE</div>
+          </div>
+        <div class="bg-white rounded- p-6 shadow-sm border border-slate-100">
+          <div class="flex justify-between items-center"><h3 class="font-extrabold">📋 Fil d'actualité citoyen ({liste.length})</h3><span class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100">{liste.length} signalements</span></div>
+          <div class="mt-5 space-y-3 max-h- overflow-y-auto pr-2">{liste.length===0? <div class="p-10 text-center text-slate-400 text-sm">Aucun signalement pour l'instant. Soyez le premier!</div> : liste.map((s,i)=><div key={s.id||i} class="p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:border-orange-200 transition"><div class="flex justify-between"><span class="text- font-extrabold tracking-widest text-orange-500 bg-orange-50 px-2 py-1 rounded-full">COCODY • ABIDJAN</span><span class="text- font-bold text-slate-400">{s.date}</span></div><div class="mt-2 font-semibold text-sm text-slate-800 leading-snug">{s.text}</div><div class="mt-3 flex gap-2"><span class="text- font-bold text-slate-500">✓ Enregistré à vie</span><span class="text- font-bold text-green-600">● Vérifié</span></div></div>)}</div>
+        </div>
+      </main>
+      <footer class="text-center py-8 text- font-bold text-slate-400 tracking-widest">RESEAU ESPOIR CITOYEN © 2026 • ABIDJAN • CONÇU AVEC ❤️ POUR LA CÔTE D'IVOIRE</footer>
+    </div>
+  );
 }
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script></body></html>
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
