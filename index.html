@@ -1,51 +1,94 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RESEAU ESPOIR CITOYEN - Photo</title>
+<title>RESEAU ESPOIR CITOYEN - Photo Compressée</title>
 <link rel="manifest" href="manifest.json"/><meta name="theme-color" content="#f97316"/>
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854878.png"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
-<style>body{font-family:'Plus Jakarta Sans',sans-serif} #map{height:380px; border-radius:24px; z-index:1} #preview{max-height:200px; border-radius:16px}</style></head>
+<style>body{font-family:'Plus Jakarta Sans',sans-serif} #map{height:380px; border-radius:24px; z-index:1} #preview{max-height:220px; border-radius:16px; border:2px solid #f97316}</style></head>
 <body class="bg-[#f5f7f9] min-h-screen">
-<header class="sticky top-0 bg-white/90 backdrop-blur border-b z-[1000]">
+<header class="sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 z-[1000]">
 <div class="max-w-6xl mx-auto px-6 h- flex items-center justify-between">
-<div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center text-white font-extrabold text-xl">RE</div><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- -mt-1 text-orange-500">CITOYEN</div><div class="text- tracking-[0.2em] text-slate-500 font-bold">PHOTO V17</div></div></div>
-<div class="flex gap-2 items-center"><button id="installBtn" class="hidden px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-extrabold text- animate-pulse">📲 INSTALLER</button><a href="https://wa.me/2250546721249" target="_blank" class="hidden md:flex px-3 py-2 rounded-full bg-green-500 text-white font-bold text-xs">💬 0546721249</a><button onclick="openAdmin()" class="px-4 py-2 rounded-full bg-slate-900 text-white font-bold text-sm">🔐</button></div>
+<div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center text-white font-extrabold text-xl">RE</div><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- -mt-1 text-orange-500">CITOYEN</div><div class="text- tracking-[0.2em] text-slate-500 font-bold">PHOTO V17.1</div></div></div>
+<div class="flex gap-2 items-center"><button id="installBtn" class="hidden px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-extrabold text- animate-pulse">📲 INSTALLER</button><a href="https://wa.me/2250546721249" target="_blank" class="hidden md:flex px-3 py-2 rounded-full bg-green-500 text-white font-bold text-xs">💬 0546721249</a><button onclick="openAdmin()" class="px-4 py-2 rounded-full bg-slate-900 text-white font-bold text-sm">🔐 Admin</button></div>
 </div></header>
 <div class="max-w-6xl mx-auto px-6 mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
-<div class="bg-slate-900 rounded- p-4 text-white"><div class="text-white/60 text- font-bold">TOTAL PHOTOS</div><div id="statTotal" class="text-3xl font-extrabold">0</div></div>
-<div class="bg-white rounded- p-4 border"><div class="text-slate-400 text- font-bold">EN DIRECT</div><div class="text-xl font-extrabold text-green-600">● LIVE PHOTO</div></div>
-<div class="bg-orange-500 rounded- p-4 text-white"><div class="text- font-bold">BASE</div><div class="text-xs font-extrabold mt-1">PostgreSQL + PHOTO ✅</div></div>
-<div class="bg-green-600 rounded- p-4 text-white"><div class="text- font-bold">ZONE</div><div class="text-sm font-extrabold">COCODY ABIDJAN</div></div>
+<div class="bg-slate-900 rounded- p-4 text-white"><div class="text-white/60 text- font-bold tracking-widest">TOTAL PHOTOS</div><div id="statTotal" class="text-3xl font-extrabold">0</div></div>
+<div class="bg-white rounded- p-4 border border-slate-100"><div class="text-slate-400 text- font-bold">EN DIRECT</div><div class="text-xl font-extrabold text-green-600">● LIVE PHOTO</div></div>
+<div class="bg-orange-500 rounded- p-4 text-white"><div class="text-white/80 text- font-bold">COMPRESSION</div><div class="text-xs font-extrabold mt-1">Auto 800px 70% ✅</div></div>
+<div class="bg-green-600 rounded- p-4 text-white"><div class="text-white/80 text- font-bold">ZONE</div><div class="text-sm font-extrabold mt-1">COCODY ABIDJAN</div></div>
 </div>
 <main class="max-w-6xl mx-auto px-6 py-6 space-y-6">
-<div class="bg-white rounded- p-4 shadow-sm border"><div class="flex justify-between items-center mb-3"><h3 class="font-extrabold">🗺️ Carte Cocody avec photos</h3><span class="text- font-bold px-2 py-1 rounded-full bg-slate-100">📸 V17</span></div><div id="map"></div></div>
+<div class="bg-white rounded- p-4 shadow-sm border border-slate-100"><div class="flex justify-between items-center mb-3"><h3 class="font-extrabold">🗺️ Carte Cocody avec photos</h3><span class="text- font-bold px-2 py-1 rounded-full bg-orange-100 text-orange-600">📸 V17.1 COMPRESSÉ</span></div><div id="map"></div></div>
 <div class="grid md:grid-cols-[400px_1fr] gap-6">
-<div class="bg-white rounded- p-6 shadow-sm border"><h3 class="font-extrabold">📸 Signaler avec photo</h3>
-<textarea id="txt" placeholder="Décris le problème..." class="w-full mt-4 h-20 p-4 rounded-2xl bg-slate-50 border text-sm outline-none focus:ring-2 focus:ring-orange-500"></textarea>
-<div class="mt-3"><label class="w-full flex flex-col items-center px-4 py-6 bg-orange-50 text-orange-600 rounded-2xl border-2 border-dashed border-orange-200 cursor-pointer hover:bg-orange-100"><span class="text-2xl">📷</span><span class="mt-1 text-xs font-bold">Clique pour ajouter une photo</span><input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/></label><img id="preview" class="hidden mt-3 w-full object-cover"/><button id="removePhoto" onclick="clearPhoto()" class="hidden mt-2 text-xs font-bold text-red-500">❌ Retirer photo</button></div>
+<div class="bg-white rounded- p-6 shadow-sm border border-slate-100"><h3 class="font-extrabold">📸 Signaler avec photo</h3>
+<textarea id="txt" placeholder="Ex: Nid de poule dangereux devant l'école..." class="w-full mt-4 h-20 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm outline-none focus:ring-2 focus:ring-orange-500"></textarea>
+<div class="mt-3"><label class="w-full flex flex-col items-center px-4 py-6 bg-orange-50 text-orange-600 rounded-2xl border-2 border-dashed border-orange-200 cursor-pointer hover:bg-orange-100"><span class="text-2xl">📷</span><span class="mt-1 text-xs font-bold">Clique pour ajouter une photo</span><span class="text- text-slate-500 mt-1">Compressée auto à 800px</span><input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/></label><img id="preview" class="hidden mt-3 w-full object-cover shadow-lg"/><div id="photoInfo" class="hidden mt-2 text- font-bold text-green-600"></div><button id="removePhoto" onclick="clearPhoto()" class="hidden mt-2 text-xs font-bold text-red-500">❌ Retirer photo</button></div>
 <button onclick="send()" id="sendBtn" class="w-full mt-4 p-4 rounded-2xl bg-slate-900 text-white font-extrabold">📸 Envoyer avec photo →</button></div>
-<div class="bg-white rounded- p-6 shadow-sm border"><div class="flex justify-between"><h3 class="font-extrabold">📋 Fil public photos (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100">↻</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto pr-1"></div></div>
+<div class="bg-white rounded- p-6 shadow-sm border border-slate-100"><div class="flex justify-between"><h3 class="font-extrabold">📋 Fil public photos (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100">↻ Actualiser</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto pr-1"></div></div>
 </div>
 </main>
 <a href="https://wa.me/2250546721249" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl shadow-2xl z-[2000]">💬</a>
 <div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-6"><div class="bg-white rounded- w-full max-w-2xl max-h- overflow-auto p-6"><div class="flex justify-between"><h2 class="font-extrabold">👑 Admin - <span id="adminCount">0</span></h2><div class="flex gap-2"><button onclick="closeAdmin()" class="px-4 py-2 rounded-full bg-slate-100 font-bold">Fermer</button><button onclick="logout()" class="px-4 py-2 rounded-full bg-red-500 text-white font-bold">Déco</button></div></div><div id="adminList" class="mt-5 divide-y"></div></div></div>
-<div id="loginModal" class="hidden fixed inset-0 bg-slate-900 z-[3000] flex items-center justify-center p-6"><div class="bg-white rounded- p-8 w-full max-w-sm"><h2 class="font-extrabold text-xl">Accès Admin</h2><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-5 p-4 rounded-xl border"/><button onclick="doLogin()" class="w-full mt-4 p-4 rounded-xl bg-slate-900 text-white font-bold">Se connecter</button><button onclick="document.getElementById('loginModal').classList.add('hidden')" class="w-full mt-3 p-3 rounded-xl bg-slate-100 font-bold">Retour</button></div></div>
+<div id="loginModal" class="hidden fixed inset-0 bg-slate-900 z-[3000] flex items-center justify-center p-6"><div class="bg-white rounded- p-8 w-full max-w-sm"><h2 class="font-extrabold text-xl">Accès Admin</h2><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-5 p-4 rounded-xl border border-slate-200"/><button onclick="doLogin()" class="w-full mt-4 p-4 rounded-xl bg-slate-900 text-white font-bold">Se connecter</button><button onclick="document.getElementById('loginModal').classList.add('hidden')" class="w-full mt-3 p-3 rounded-xl bg-slate-100 font-bold">Retour</button></div></div>
 <script>
 const API="https://reseau-espoir-backend.onrender.com"; let allData=[]; let map, markers=[]; let currentPhotoBase64=null;
-function initMap(){ map = L.map('map').setView([5.359, -3.983], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); L.marker([5.359, -3.983]).addTo(map).bindPopup("<b>📍 Centre Cocody</b>");}
-function updateMap(){ markers.forEach(m=>map.removeLayer(m)); markers=[]; allData.forEach((s,i)=>{ let lat = 5.359 + (Math.random()-0.5)*0.02; let lng = -3.983 + (Math.random()-0.5)*0.02; let m = L.marker([lat,lng],{icon: L.divIcon({html:`<div style='background:#ef4444;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:3px solid white'>${i+1}</div>`, className:''})}).addTo(map); let img = s.photo?`<br/><img src='${s.photo}' style='width:120px;border-radius:8px;margin-top:4px'/>`:''; m.bindPopup(`<b>#${i+1}</b> ${s.text}${img}`); markers.push(m); }); if(markers.length>0){ let g=L.featureGroup(markers); map.fitBounds(g.getBounds().pad(0.2)); } }
-function previewPhoto(e){ const file=e.target.files[0]; if(!file) return; if(file.size>3*1024*1024){alert("Photo trop lourde >3MB"); return;} const reader=new FileReader(); reader.onload=(ev)=>{ currentPhotoBase64=ev.target.result; document.getElementById('preview').src=currentPhotoBase64; document.getElementById('preview').classList.remove('hidden'); document.getElementById('removePhoto').classList.remove('hidden'); }; reader.readAsDataURL(file); }
-function clearPhoto(){ currentPhotoBase64=null; document.getElementById('photoInput').value=''; document.getElementById('preview').classList.add('hidden'); document.getElementById('removePhoto').classList.add('hidden'); }
-function load(){fetch(API+"?signalements").then(r=>r.json()).then(d=>{if(Array.isArray(d)){allData=d; render(); updateMap();}});}
-function render(){ document.getElementById('count').innerText=allData.length; document.getElementById('adminCount').innerText=allData.length; document.getElementById('statTotal').innerText=allData.length; let h=""; if(allData.length===0) h='<div class="p-8 text-center text-slate-400 text-sm">Aucun</div>'; else allData.forEach((s,i)=>{ let img=s.photo?`<img src='${s.photo}' class='mt-2 w-full h-48 object-cover rounded-xl'/>`:''; h+=`<div class="p-4 rounded-2xl bg-slate-50 border"><div class="flex justify-between"><span class="text- font-extrabold text-orange-500 bg-orange-50 px-2 py-1 rounded-full">#${i+1} • COCODY 📸</span><span class="text- text-slate-400">${s.date||''}</span></div><div class="mt-2 font-semibold text-sm">${s.text}</div>${img}<div class="mt-2 flex gap-2"><a href="https://wa.me/?text=${encodeURIComponent(s.text)}" target="_blank" class="text- font-bold px-3 py-1 rounded-full bg-green-500 text-white">📱 Partager</a></div></div>`}); document.getElementById('list').innerHTML=h; let ah=""; allData.forEach(s=>{ ah+=`<div class="py-3 flex justify-between"><div><div class="text-xs text-slate-400">${s.date||''}</div><div class="text-sm font-semibold">${s.text}</div>${s.photo?`<img src='${s.photo}' style='width:80px;border-radius:8px;margin-top:4px'/>`:''}</div><button onclick="del(${s.id})" class="px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold">Supp</button></div>`}); document.getElementById('adminList').innerHTML=ah; }
-function send(){let t=document.getElementById('txt').value.trim(); if(!t) return alert("Écris un texte!"); let btn=document.getElementById('sendBtn'); btn.innerText="⏳ Envoi..."; btn.disabled=true; fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t, photo: currentPhotoBase64})}).then(r=>r.json()).then(res=>{if(res.all){allData=res.all; render(); updateMap();} document.getElementById('txt').value=''; clearPhoto(); btn.innerText="📸 Envoyer avec photo →"; btn.disabled=false;});}
-function openAdmin(){if(localStorage.getItem('admin')==='1'){document.getElementById('adminModal').classList.remove('hidden'); load();} else document.getElementById('loginModal').classList.remove('hidden');}
-function closeAdmin(){document.getElementById('adminModal').classList.add('hidden');}
-function doLogin(){let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{if(res.status==='ok'){localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); load();} else alert('Mauvais mdp');});}
-function del(id){if(!confirm('Supprimer?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load());}
-function logout(){localStorage.removeItem('admin'); closeAdmin();}
-let deferredPrompt; window.addEventListener('beforeinstallprompt', e=>{e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').classList.remove('hidden');}); document.getElementById('installBtn').addEventListener('click', async()=>{ if(deferredPrompt){deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted') document.getElementById('installBtn').innerText='✅ Installée!'; deferredPrompt=null;} else alert("iPhone: Partager ⬆️ > Sur l'écran d'accueil. Android: ⋮ > Installer"); });
+function initMap(){ map = L.map('map').setView([5.359, -3.983], 13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); L.marker([5.359, -3.983]).addTo(map).bindPopup("<b>📍 Centre Cocody</b><br/>Réseau Espoir"); }
+function updateMap(){ markers.forEach(m=>map.removeLayer(m)); markers=[]; allData.forEach((s,i)=>{ let lat=5.359+(Math.random()-0.5)*0.02; let lng=-3.983+(Math.random()-0.5)*0.02; let m=L.marker([lat,lng],{icon:L.divIcon({html:`<div style='background:#ef4444;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)'>${i+1}</div>`,className:''})}).addTo(map); let img=s.photo?`<br/><img src='${s.photo}' style='width:150px;border-radius:10px;margin-top:6px;border:2px solid #f97316'/>`:''; m.bindPopup(`<b>#${i+1} COCODY</b><br/>${s.text.substring(0,80)}${img}`); markers.push(m); }); if(markers.length>0){ let g=L.featureGroup(markers); map.fitBounds(g.getBounds().pad(0.2)); } }
+function previewPhoto(e){
+  const file=e.target.files[0]; if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(ev)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const maxW=800;
+      let w=img.width, h=img.height;
+      if(w>maxW){ h=h*maxW/w; w=maxW; }
+      canvas.width=w; canvas.height=h;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      currentPhotoBase64=canvas.toDataURL('image/jpeg',0.7);
+      document.getElementById('preview').src=currentPhotoBase64;
+      document.getElementById('preview').classList.remove('hidden');
+      document.getElementById('removePhoto').classList.remove('hidden');
+      document.getElementById('photoInfo').classList.remove('hidden');
+      document.getElementById('photoInfo').innerText=`✅ Photo compressée: ${w}x${h} - ${(currentPhotoBase64.length/1024).toFixed(0)}KB prête!`;
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clearPhoto(){ currentPhotoBase64=null; document.getElementById('photoInput').value=''; document.getElementById('preview').classList.add('hidden'); document.getElementById('removePhoto').classList.add('hidden'); document.getElementById('photoInfo').classList.add('hidden'); }
+function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d; render(); updateMap(); } }); }
+function render(){
+  document.getElementById('count').innerText=allData.length; document.getElementById('adminCount').innerText=allData.length; document.getElementById('statTotal').innerText=allData.length;
+  let h=""; if(allData.length===0) h='<div class="p-8 text-center text-slate-400 text-sm">Aucun signalement. Sois le premier avec photo!</div>';
+  else allData.forEach((s,i)=>{
+    let img=s.photo?`<img src='${s.photo}' class='mt-3 w-full h-52 object-cover rounded-2xl border-2 border-orange-100 shadow-sm'/>`:'<div class="mt-2 text- text-slate-400 italic">Pas de photo</div>';
+    h+=`<div class="p-4 rounded-2xl bg-slate-50 border border-slate-100"><div class="flex justify-between items-center"><span class="text- font-extrabold text-orange-600 bg-orange-50 px-2 py-1 rounded-full">#${i+1} • COCODY 📸</span><span class="text- text-slate-400">${s.date||''}</span></div><div class="mt-2 font-semibold text-sm leading-snug">${s.text}</div>${img}<div class="mt-3 flex gap-2"><a href="https://wa.me/?text=${encodeURIComponent('🚨 '+s.text+' - Vu sur RESEAU ESPOIR')}" target="_blank" class="text- font-bold px-3 py-1.5 rounded-full bg-green-500 text-white">📱 Partager</a><a href="${s.photo||'#'}" target="_blank" class="text- font-bold px-3 py-1.5 rounded-full bg-slate-900 text-white ${s.photo?'':'hidden'}">🔍 Voir photo</a></div></div>`;
+  });
+  document.getElementById('list').innerHTML=h;
+  let ah=""; allData.forEach(s=>{ ah+=`<div class="py-3 flex justify-between items-start gap-3"><div class="flex-1"><div class="text- text-slate-400">${s.date||''}</div><div class="text-sm font-semibold">${s.text}</div>${s.photo?`<img src='${s.photo}' style='width:80px;height:60px;object-fit:cover;border-radius:8px;margin-top:6px;border:1px solid #ddd'/>`:''}</div><button onclick="del(${s.id})" class="px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold">Supp</button></div>`; });
+  document.getElementById('adminList').innerHTML=ah||'<div class="p-8 text-center text-slate-400">Vide</div>';
+}
+function send(){
+  let t=document.getElementById('txt').value.trim(); if(!t) return alert("Écris un texte!");
+  let btn=document.getElementById('sendBtn'); btn.innerText="⏳ Compression + Envoi..."; btn.disabled=true;
+  fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t, photo: currentPhotoBase64})})
+ .then(r=>{ if(!r.ok) throw new Error("Erreur backend"); return r.json(); })
+ .then(res=>{ if(res.all){ allData=res.all; render(); updateMap(); } document.getElementById('txt').value=''; clearPhoto(); btn.innerText="📸 Envoyer avec photo →"; btn.disabled=false; })
+ .catch(err=>{ alert("Erreur: "+err.message+"\nVérifie que ton backend est bien à jour avec photo!"); btn.innerText="📸 Envoyer avec photo →"; btn.disabled=false; });
+}
+function openAdmin(){ if(localStorage.getItem('admin')==='1'){ document.getElementById('adminModal').classList.remove('hidden'); load(); } else document.getElementById('loginModal').classList.remove('hidden'); }
+function closeAdmin(){ document.getElementById('adminModal').classList.add('hidden'); }
+function doLogin(){ let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{ if(res.status==='ok'){ localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); load(); } else alert('Mauvais mdp'); }); }
+function del(id){ if(!confirm('Supprimer ce signalement avec photo?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load()); }
+function logout(){ localStorage.removeItem('admin'); closeAdmin(); }
+let deferredPrompt; window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').classList.remove('hidden'); }); document.getElementById('installBtn').addEventListener('click', async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted'){ document.getElementById('installBtn').innerText='✅ Installée!'; setTimeout(()=>document.getElementById('installBtn').classList.add('hidden'),2000); } deferredPrompt=null; } else { alert("📲 iPhone: Partager ⬆️ > Sur l'écran d'accueil\nAndroid: ⋮ > Installer l'application"); } });
 initMap(); load(); setInterval(load,8000);
 </script>
+<footer class="text-center py-8 text- font-bold text-slate-400 tracking-[0.2em]">RESEAU ESPOIR CITOYEN V17.1 PHOTO COMPRESSÉE © 2026 • <span id="footerCount">0</span> PHOTOS À VIE • 📸 COMPRESSION AUTO 800px</footer>
+<script>setInterval(()=>{ let f=document.getElementById('footerCount'); if(f) f.innerText=allData.length; },1000);</script>
 </body></html>
