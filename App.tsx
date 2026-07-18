@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
+import { createRoot } from 'react-dom/client'
 
 const API_URL = "https://reseau-espoir-backend.onrender.com"
 
-export default function App() {
+function App() {
   const [apiStatus, setApiStatus] = useState("Connexion en cours...")
   const [signalement, setSignalement] = useState("")
   const [liste, setListe] = useState<string[]>([])
@@ -28,7 +29,7 @@ export default function App() {
         
         <div style={{textAlign:'center', marginBottom:20}}>
           <img src="/logo.png" alt="Logo" style={{width:100, height:100, borderRadius:20}} 
-               onError={(e)=>e.currentTarget.style.display='none'} />
+               onError={(e)=>{ (e.target as HTMLImageElement).style.display='none' }} />
           <h1 style={{color:'#0f172a', fontSize:26, fontWeight:800, margin:'10px 0'}}>RESEAU ESPOIR CITOYEN</h1>
           <div style={{background:'#dcfce7', color:'#166534', padding:'8px 16px', borderRadius:20, fontSize:13, fontWeight:700, display:'inline-block'}}>
             {apiStatus}
@@ -71,3 +72,11 @@ export default function App() {
     </div>
   )
 }
+
+// CECI EST CE QUI MANQUAIT - LE MOTEUR QUI ALLUME L'APP
+const rootEl = document.getElementById('root')
+if (rootEl) {
+  createRoot(rootEl).render(<App />)
+}
+
+export default App
