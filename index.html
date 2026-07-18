@@ -7,7 +7,7 @@
 <header class="sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 z-20">
 <div class="max-w-6xl mx-auto px-6 h- flex items-center justify-between">
 <div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center text-white font-extrabold text-xl">RE</div><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- -mt-1 text-orange-500">CITOYEN</div><div class="text- tracking-[0.2em] text-slate-500 font-bold">CÔTE D'IVOIRE</div></div></div>
-<div class="flex gap-2"><span id="dbStatus" class="text-xs font-bold px-3 py-2 rounded-full bg-green-50 text-green-700 border border-green-200">● PostgreSQL A VIE ✅</span><button onclick="openAdmin()" class="px-4 py-2 rounded-full bg-slate-900 text-white font-bold text-sm">🔐 Admin</button></div>
+<div class="flex gap-2"><span class="text-xs font-bold px-3 py-2 rounded-full bg-green-50 text-green-700 border border-green-200">● PostgreSQL A VIE ✅</span><a href="https://wa.me/2250546721249" target="_blank" class="px-3 py-2 rounded-full bg-green-500 text-white font-bold text-xs">💬 WhatsApp</a><button onclick="openAdmin()" class="px-4 py-2 rounded-full bg-slate-900 text-white font-bold text-sm">🔐 Admin</button></div>
 </div></header>
 
 <main class="max-w-6xl mx-auto px-6 py-8 grid md:grid-cols-[380px_1fr] gap-6">
@@ -15,14 +15,14 @@
 <div class="bg-slate-900 rounded- p-7 text-white relative overflow-hidden">
 <div class="absolute -right-12 -top-12 w-48 h-48 bg-orange-500 rounded-full blur-3xl opacity-30"></div>
 <h1 class="relative text- font-extrabold leading-[1.1]">L'espoir passe par l'action citoyenne.</h1>
-<p class="relative mt-3 text-white/70 text- leading-relaxed">Signalez les problèmes de votre quartier. Votre voix est enregistrée à vie.</p>
-<div class="relative mt-5 flex gap-2"><div class="px-3 py-1.5 rounded-full bg-white/10 text- font-bold">🇨🇮 100% IVOIRIEN</div><div class="px-3 py-1.5 rounded-full bg-orange-500 text- font-bold">À VIE ✅</div></div>
+<p class="relative mt-3 text-white/70 text-">Signalez les problèmes de votre quartier. Votre voix est enregistrée à vie.</p>
+<div class="relative mt-5 flex gap-2"><a href="https://wa.me/2250546721249?text=Bonjour%20Reseau%20Espoir%20Citoyen%20je%20veux%20signaler%20un%20probleme%20a%20Cocody" target="_blank" class="px-4 py-2 rounded-full bg-green-500 text-white text-xs font-bold">📱 Contacter sur WhatsApp : 0546721249</a></div>
 </div>
 <div class="bg-white rounded- p-6 shadow-sm border border-slate-100">
 <h3 class="font-extrabold">🚨 Faire un signalement</h3>
 <textarea id="txt" placeholder="Ex: Nid de poule dangereux devant lycée technique Cocody..." class="w-full mt-4 h-28 p-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-2 focus:ring-orange-500 text-sm"></textarea>
-<button onclick="send()" class="w-full mt-4 p-4 rounded-2xl bg-slate-900 text-white font-extrabold hover:bg-black">Envoyer mon signalement →</button>
-<div class="mt-3 text- font-bold text-center text-slate-400 tracking-widest">SÉCURISÉ • ANONYME • STOCKÉ À VIE</div>
+<button onclick="send()" class="w-full mt-4 p-4 rounded-2xl bg-slate-900 text-white font-extrabold">Envoyer mon signalement →</button>
+<div class="mt-3 text- font-bold text-center text-slate-400">SÉCURISÉ • ANONYME • STOCKÉ À VIE</div>
 </div>
 </div>
 <div class="bg-white rounded- p-6 shadow-sm border border-slate-100">
@@ -31,25 +31,22 @@
 </div>
 </main>
 
-<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6">
-<div class="bg-white rounded- w-full max-w-2xl max-h- overflow-auto p-6">
-<div class="flex justify-between items-center"><h2 class="font-extrabold text-lg">👑 Tableau Admin - <span id="adminCount">0</span> signalements</h2><div class="flex gap-2"><button onclick="closeAdmin()" class="px-4 py-2 rounded-full bg-slate-100 font-bold">Fermer</button><button onclick="logout()" class="px-4 py-2 rounded-full bg-red-500 text-white font-bold">Déco</button></div></div>
-<div id="adminList" class="mt-5 divide-y"></div>
-</div></div>
+<!-- WHATSAPP FLOTTANT -->
+<a href="https://wa.me/2250546721249?text=Bonjour%20RESEAU%20ESPOIR%20CITOYEN%20!" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl shadow-2xl z-50 hover:bg-green-600">💬</a>
 
-<div id="loginModal" class="hidden fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-6">
-<div class="bg-white rounded- p-8 w-full max-w-sm"><h2 class="font-extrabold text-xl">Accès Admin</h2><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-5 p-4 rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-orange-500"/><button onclick="doLogin()" class="w-full mt-4 p-4 rounded-xl bg-slate-900 text-white font-bold">Se connecter</button><button onclick="document.getElementById('loginModal').classList.add('hidden')" class="w-full mt-3 p-3 rounded-xl bg-slate-100 font-bold">Retour</button></div>
-</div>
+<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"><div class="bg-white rounded- w-full max-w-2xl max-h- overflow-auto p-6"><div class="flex justify-between items-center"><h2 class="font-extrabold text-lg">👑 Admin - <span id="adminCount">0</span></h2><div class="flex gap-2"><button onclick="closeAdmin()" class="px-4 py-2 rounded-full bg-slate-100 font-bold">Fermer</button><button onclick="logout()" class="px-4 py-2 rounded-full bg-red-500 text-white font-bold">Déco</button></div></div><div id="adminList" class="mt-5 divide-y"></div></div></div>
+<div id="loginModal" class="hidden fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-6"><div class="bg-white rounded- p-8 w-full max-w-sm"><h2 class="font-extrabold text-xl">Accès Admin</h2><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-5 p-4 rounded-xl border"/><button onclick="doLogin()" class="w-full mt-4 p-4 rounded-xl bg-slate-900 text-white font-bold">Se connecter</button><button onclick="document.getElementById('loginModal').classList.add('hidden')" class="w-full mt-3 p-3 rounded-xl bg-slate-100 font-bold">Retour</button></div></div>
 
 <script>
-const API="https://reseau-espoir-backend.onrender.com";
-let allData=[];
+const API="https://reseau-espoir-backend.onrender.com"; let allData=[];
 function load(){fetch(API+"?signalements").then(r=>r.json()).then(d=>{if(Array.isArray(d)){allData=d; render();}});}
 function render(){
- document.getElementById('count').innerText=allData.length;
- document.getElementById('adminCount').innerText=allData.length;
+ document.getElementById('count').innerText=allData.length; document.getElementById('adminCount').innerText=allData.length;
  let h=""; if(allData.length===0) h='<div class="p-12 text-center text-slate-400 text-sm">Aucun signalement. Sois le 1er!</div>';
- else allData.forEach(s=>{h+=`<div class="p-4 rounded-2xl bg-slate-50 border border-slate-100"><div class="flex justify-between"><span class="text- font-extrabold tracking-widest text-orange-500 bg-orange-50 px-2 py-1 rounded-full">COCODY • ABIDJAN</span><span class="text- font-bold text-slate-400">${s.date||''}</span></div><div class="mt-2 font-semibold text-sm">${s.text}</div><div class="mt-2 text- font-bold text-green-600">✓ Enregistré à vie • PostgreSQL</div></div>`});
+ else allData.forEach(s=>{
+  let waText=encodeURIComponent("🚨 SIGNALEMENT RESEAU ESPOIR CITOYEN 🚨\n\n"+s.text+"\n\n📍 Cocody - Abidjan\n📅 "+(s.date||'')+"\n\nVia: https://reseau-espoir-frontend.onrender.com");
+  h+=`<div class="p-4 rounded-2xl bg-slate-50 border border-slate-100"><div class="flex justify-between"><span class="text- font-extrabold tracking-widest text-orange-500 bg-orange-50 px-2 py-1 rounded-full">COCODY • ABIDJAN</span><span class="text- font-bold text-slate-400">${s.date||''}</span></div><div class="mt-2 font-semibold text-sm">${s.text}</div><div class="mt-3 flex gap-2"><span class="text- font-bold text-green-600">✓ Enregistré à vie</span><a href="https://wa.me/?text=${waText}" target="_blank" class="ml-auto text- font-bold px-3 py-1 rounded-full bg-green-500 text-white">📱 Partager WhatsApp</a><a href="https://wa.me/2250546721249?text=${waText}" target="_blank" class="text- font-bold px-3 py-1 rounded-full bg-slate-900 text-white">Contacter 0546721249</a></div></div>`
+ });
  document.getElementById('list').innerHTML=h;
  let ah=""; allData.forEach(s=>{ah+=`<div class="py-4 flex justify-between"><div><div class="text-xs font-bold text-slate-400">${s.date||''}</div><div class="font-semibold text-sm mt-1">${s.text}</div></div><button onclick="del(${s.id})" class="px-3 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-bold">Supprimer</button></div>`});
  document.getElementById('adminList').innerHTML=ah||'<div class="p-8 text-center text-slate-400">Vide</div>';
@@ -57,11 +54,10 @@ function render(){
 function send(){let t=document.getElementById('txt').value.trim(); if(!t) return; fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})}).then(r=>r.json()).then(res=>{if(res.all){allData=res.all; render();} document.getElementById('txt').value='';});}
 function openAdmin(){if(localStorage.getItem('admin')==='1'){document.getElementById('adminModal').classList.remove('hidden'); load();} else document.getElementById('loginModal').classList.remove('hidden');}
 function closeAdmin(){document.getElementById('adminModal').classList.add('hidden');}
-function doLogin(){let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{if(res.status==='ok'){localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); load();} else alert('Mauvais mot de passe');});}
+function doLogin(){let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{if(res.status==='ok'){localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); load();} else alert('Mauvais mdp');});}
 function del(id){if(!confirm('Supprimer?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load());}
 function logout(){localStorage.removeItem('admin'); closeAdmin();}
-load();
-setInterval(load,5000);
+load(); setInterval(load,5000);
 </script>
-<footer class="text-center py-8 text- font-bold text-slate-400 tracking-[0.2em]">RESEAU ESPOIR CITOYEN © 2026 • ABIDJAN • CONÇU AVEC ❤️ POUR LA CÔTE D'IVOIRE</footer>
+<footer class="text-center py-8 text- font-bold text-slate-400 tracking-[0.2em]">RESEAU ESPOIR CITOYEN © 2026 • ABIDJAN • WHATSAPP: 0546721249</footer>
 </body></html>
