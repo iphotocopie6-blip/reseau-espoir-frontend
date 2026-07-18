@@ -1,71 +1,78 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RESEAU ESPOIR CITOYEN - Stats en direct</title><script src="https://cdn.tailwindcss.com"></script>
+<title>RESEAU ESPOIR CITOYEN - Carte Cocody</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;800&display=swap" rel="stylesheet">
-<style>body{font-family:'Plus Jakarta Sans',sans-serif}</style></head>
+<style>body{font-family:'Plus Jakarta Sans',sans-serif} #map{height:420px; border-radius:24px; z-index:1}</style></head>
 <body class="bg-[#f5f7f9] min-h-screen">
-<header class="sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 z-20">
+<header class="sticky top-0 bg-white/90 backdrop-blur border-b border-slate-200 z-[1000]">
 <div class="max-w-6xl mx-auto px-6 h- flex items-center justify-between">
 <div class="flex items-center gap-3"><div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center text-white font-extrabold text-xl">RE</div><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- -mt-1 text-orange-500">CITOYEN</div><div class="text- tracking-[0.2em] text-slate-500 font-bold">CÔTE D'IVOIRE</div></div></div>
 <div class="flex gap-2"><a href="https://wa.me/2250546721249" target="_blank" class="hidden md:flex px-3 py-2 rounded-full bg-green-500 text-white font-bold text-xs">💬 0546721249</a><button onclick="openAdmin()" class="px-4 py-2 rounded-full bg-slate-900 text-white font-bold text-sm">🔐 Admin</button></div>
 </div></header>
 
-<!-- COMPTEUR PUBLIC GÉANT -->
 <div class="max-w-6xl mx-auto px-6 mt-6">
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-<div class="bg-slate-900 rounded- p-5 text-white flex justify-between items-center"><div><div class="text-white/60 text- font-bold tracking-widest">TOTAL SIGNALEMENTS</div><div id="statTotal" class="text-4xl font-extrabold mt-1">0</div><div class="text- text-white/50 mt-1">Depuis le 18/07/2026</div></div><div class="text-4xl">📊</div></div>
-<div class="bg-white rounded- p-5 border border-slate-100 flex justify-between items-center"><div><div class="text-slate-400 text- font-bold tracking-widest">AUJOURD'HUI</div><div id="statToday" class="text-3xl font-extrabold mt-1 text-slate-900">0</div><div class="text- text-green-600 font-bold mt-1">● En direct</div></div><div class="text-3xl">🔥</div></div>
-<div class="bg-orange-500 rounded- p-5 text-white flex justify-between items-center"><div><div class="text-white/80 text- font-bold tracking-widest">STATUT BASE</div><div class="text-sm font-extrabold mt-2 leading-tight">PostgreSQL<br/>A VIE ✅</div><div class="text- text-white/70 mt-1">0% perte</div></div><div class="text-3xl">💾</div></div>
-<div class="bg-green-600 rounded- p-5 text-white flex justify-between items-center"><div><div class="text-white/80 text- font-bold tracking-widest">ZONE COUVERTE</div><div class="text-xl font-extrabold mt-2">COCODY<br/>ABIDJAN</div><div class="text- text-white/70 mt-1">📱 WhatsApp: 0546721249</div></div><div class="text-3xl">🇨🇮</div></div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+<div class="bg-slate-900 rounded- p-4 text-white"><div class="text-white/60 text- font-bold tracking-widest">TOTAL</div><div id="statTotal" class="text-3xl font-extrabold">0</div></div>
+<div class="bg-white rounded- p-4 border"><div class="text-slate-400 text- font-bold">EN DIRECT</div><div class="text-2xl font-extrabold text-green-600">● LIVE</div></div>
+<div class="bg-orange-500 rounded- p-4 text-white"><div class="text-white/80 text- font-bold">BASE</div><div class="text-xs font-extrabold mt-1">PostgreSQL A VIE ✅</div></div>
+<div class="bg-green-600 rounded- p-4 text-white"><div class="text-white/80 text- font-bold">ZONE</div><div class="text-sm font-extrabold mt-1">COCODY • ABIDJAN</div></div>
 </div>
 </div>
 
-<main class="max-w-6xl mx-auto px-6 py-6 grid md:grid-cols-[380px_1fr] gap-6">
-<div class="space-y-5">
-<div class="bg-slate-900 rounded- p-7 text-white relative overflow-hidden">
-<div class="absolute -right-12 -top-12 w-48 h-48 bg-orange-500 rounded-full blur-3xl opacity-30"></div>
-<h1 class="relative text- font-extrabold leading-[1.1]">L'espoir passe par l'action citoyenne.</h1>
-<p class="relative mt-3 text-white/70 text-">Chaque signalement compte. <span id="liveCount" class="text-orange-400 font-extrabold">0</span> citoyens ont déjà agi!</p>
+<main class="max-w-6xl mx-auto px-6 py-6 space-y-6">
+<!-- CARTE -->
+<div class="bg-white rounded- p-4 shadow-sm border border-slate-100">
+<div class="flex justify-between items-center mb-3"><h3 class="font-extrabold">🗺️ Carte des signalements - Cocody</h3><span class="text- font-bold px-2 py-1 rounded-full bg-slate-100">5.336°N, 4.002°W</span></div>
+<div id="map"></div>
+<div class="mt-3 flex gap-2 text- font-bold"><span class="px-2 py-1 rounded-full bg-red-100 text-red-600">● Problème signalé</span><span class="px-2 py-1 rounded-full bg-green-100 text-green-600">● Centre Cocody</span></div>
 </div>
-<div class="bg-white rounded- p-6 shadow-sm border border-slate-100">
-<h3 class="font-extrabold">🚨 Faire un signalement</h3>
-<textarea id="txt" placeholder="Ex: Nid de poule dangereux devant lycée technique..." class="w-full mt-4 h-28 p-4 rounded-2xl bg-slate-50 border border-slate-200 outline-none focus:ring-2 focus:ring-orange-500 text-sm"></textarea>
-<button onclick="send()" class="w-full mt-4 p-4 rounded-2xl bg-slate-900 text-white font-extrabold">Envoyer → Compteur +1</button>
-</div>
-</div>
-<div class="bg-white rounded- p-6 shadow-sm border border-slate-100">
-<div class="flex justify-between items-center"><h3 class="font-extrabold">📋 Fil public (<span id="count">0</span>)</h3><div class="flex gap-2"><span class="text- font-bold px-2 py-1 rounded-full bg-green-50 text-green-700">● LIVE</span><button onclick="load()" class="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100">↻</button></div></div>
-<div id="list" class="mt-5 space-y-3 max-h- overflow-auto pr-1"></div>
+
+<div class="grid md:grid-cols-[380px_1fr] gap-6">
+<div class="bg-white rounded- p-6 shadow-sm border"><h3 class="font-extrabold">🚨 Faire un signalement</h3><textarea id="txt" placeholder="Ex: Nid de poule dangereux devant..." class="w-full mt-4 h-28 p-4 rounded-2xl bg-slate-50 border text-sm outline-none focus:ring-2 focus:ring-orange-500"></textarea><button onclick="send()" class="w-full mt-4 p-4 rounded-2xl bg-slate-900 text-white font-extrabold">Envoyer → Carte +1</button></div>
+<div class="bg-white rounded- p-6 shadow-sm border"><div class="flex justify-between"><h3 class="font-extrabold">📋 Fil public (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1.5 rounded-full bg-slate-100">↻</button></div><div id="list" class="mt-4 space-y-3 max-h- overflow-auto"></div></div>
 </div>
 </main>
 
-<a href="https://wa.me/2250546721249" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl shadow-2xl z-50">💬</a>
-<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"><div class="bg-white rounded- w-full max-w-2xl max-h- overflow-auto p-6"><div class="flex justify-between"><h2 class="font-extrabold">👑 Admin - <span id="adminCount">0</span></h2><div class="flex gap-2"><button onclick="closeAdmin()" class="px-4 py-2 rounded-full bg-slate-100 font-bold">Fermer</button><button onclick="logout()" class="px-4 py-2 rounded-full bg-red-500 text-white font-bold">Déco</button></div></div><div id="adminList" class="mt-5 divide-y"></div></div></div>
-<div id="loginModal" class="hidden fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-6"><div class="bg-white rounded- p-8 w-full max-w-sm"><h2 class="font-extrabold text-xl">Accès Admin</h2><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-5 p-4 rounded-xl border"/><button onclick="doLogin()" class="w-full mt-4 p-4 rounded-xl bg-slate-900 text-white font-bold">Se connecter</button><button onclick="document.getElementById('loginModal').classList.add('hidden')" class="w-full mt-3 p-3 rounded-xl bg-slate-100 font-bold">Retour</button></div></div>
+<a href="https://wa.me/2250546721249" target="_blank" class="fixed bottom-6 right-6 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white text-2xl shadow-2xl z-[2000]">💬</a>
+<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-6"><div class="bg-white rounded- w-full max-w-2xl max-h- overflow-auto p-6"><div class="flex justify-between"><h2 class="font-extrabold">👑 Admin - <span id="adminCount">0</span></h2><div class="flex gap-2"><button onclick="closeAdmin()" class="px-4 py-2 rounded-full bg-slate-100 font-bold">Fermer</button><button onclick="logout()" class="px-4 py-2 rounded-full bg-red-500 text-white font-bold">Déco</button></div></div><div id="adminList" class="mt-5 divide-y"></div></div></div>
+<div id="loginModal" class="hidden fixed inset-0 bg-slate-900 z-[3000] flex items-center justify-center p-6"><div class="bg-white rounded- p-8 w-full max-w-sm"><h2 class="font-extrabold text-xl">Accès Admin</h2><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-5 p-4 rounded-xl border"/><button onclick="doLogin()" class="w-full mt-4 p-4 rounded-xl bg-slate-900 text-white font-bold">Se connecter</button><button onclick="document.getElementById('loginModal').classList.add('hidden')" class="w-full mt-3 p-3 rounded-xl bg-slate-100 font-bold">Retour</button></div></div>
 
 <script>
-const API="https://reseau-espoir-backend.onrender.com"; let allData=[];
-function load(){fetch(API+"?signalements").then(r=>r.json()).then(d=>{if(Array.isArray(d)){allData=d; render();}});}
-function render(){
- let total=allData.length;
- document.getElementById('count').innerText=total; document.getElementById('adminCount').innerText=total;
- document.getElementById('statTotal').innerText=total; document.getElementById('liveCount').innerText=total;
- let today=new Date().toLocaleDateString('fr-FR'); let todayCount=allData.filter(s=> (s.date||'').includes(today.split('/')[0]) ).length;
- document.getElementById('statToday').innerText=allData.length; // simplifié : total = aujourd'hui pour le début
- let h=""; if(total===0) h='<div class="p-12 text-center text-slate-400 text-sm">Aucun signalement. Sois le 1er!</div>';
- else allData.forEach(s=>{let wa=encodeURIComponent("🚨 RESEAU ESPOIR CITOYEN ("+total+" signalements)\n\n"+s.text+"\n📍 Cocody\n📅 "+(s.date||'')+"\n\n👉 https://reseau-espoir-frontend.onrender.com"); h+=`<div class="p-4 rounded-2xl bg-slate-50 border border-slate-100"><div class="flex justify-between"><span class="text- font-extrabold text-orange-500 bg-orange-50 px-2 py-1 rounded-full">COCODY • ABIDJAN</span><span class="text- font-bold text-slate-400">${s.date||''}</span></div><div class="mt-2 font-semibold text-sm">${s.text}</div><div class="mt-3 flex gap-2"><a href="https://wa.me/?text=${wa}" target="_blank" class="text- font-bold px-3 py-1 rounded-full bg-green-500 text-white">📱 Partager</a><a href="https://wa.me/2250546721249?text=${wa}" target="_blank" class="text- font-bold px-3 py-1 rounded-full bg-slate-900 text-white">Contacter</a></div></div>`});
- document.getElementById('list').innerHTML=h;
- let ah=""; allData.forEach(s=>{ah+=`<div class="py-4 flex justify-between"><div><div class="text-xs font-bold text-slate-400">${s.date||''}</div><div class="font-semibold text-sm mt-1">${s.text}</div></div><button onclick="del(${s.id})" class="px-3 py-1.5 rounded-full bg-red-50 text-red-600 text-xs font-bold">Supprimer</button></div>`});
- document.getElementById('adminList').innerHTML=ah||'<div class="p-8 text-center text-slate-400">Vide</div>';
+const API="https://reseau-espoir-backend.onrender.com"; let allData=[]; let map, markers=[];
+function initMap(){
+ map = L.map('map').setView([5.3436, -4.0023], 13);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+ L.marker([5.3436, -4.0023]).addTo(map).bindPopup("<b>📍 Centre Cocody</b><br/>Réseau Espoir Citoyen");
 }
-function send(){let t=document.getElementById('txt').value.trim(); if(!t) return; fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})}).then(r=>r.json()).then(res=>{if(res.all){allData=res.all; render();} document.getElementById('txt').value='';});}
+function updateMap(){
+ markers.forEach(m=>map.removeLayer(m)); markers=[];
+ allData.forEach((s,i)=>{
+  let lat = 5.3436 + (Math.random()-0.5)*0.04;
+  let lng = -4.0023 + (Math.random()-0.5)*0.04;
+  let m = L.marker([lat,lng],{icon: L.divIcon({html:`<div style='background:#ef4444;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)'>${i+1}</div>`, className:''})}).addTo(map);
+  let wa=encodeURIComponent("🚨 "+s.text+"\n📍 Cocody\n📅 "+(s.date||''));
+  m.bindPopup(`<b>Signalement #${i+1}</b><br/>${s.text}<br/><small>${s.date||''}</small><br/><a href='https://wa.me/2250546721249?text=${wa}' target='_blank' style='color:green;font-weight:bold'>📱 Contacter</a>`);
+  markers.push(m);
+ });
+ if(markers.length>0){ let g = L.featureGroup(markers); map.fitBounds(g.getBounds().pad(0.2)); }
+}
+function load(){fetch(API+"?signalements").then(r=>r.json()).then(d=>{if(Array.isArray(d)){allData=d; render(); updateMap();}});}
+function render(){
+ document.getElementById('count').innerText=allData.length; document.getElementById('adminCount').innerText=allData.length; document.getElementById('statTotal').innerText=allData.length;
+ let h=""; if(allData.length===0) h='<div class="p-8 text-center text-slate-400 text-sm">Aucun signalement</div>';
+ else allData.forEach((s,i)=>{let wa=encodeURIComponent("🚨 "+s.text+"\n📍 Cocody"); h+=`<div class="p-4 rounded-2xl bg-slate-50 border"><div class="flex justify-between"><span class="text- font-extrabold text-orange-500 bg-orange-50 px-2 py-1 rounded-full">#${i+1} • COCODY</span><span class="text- text-slate-400">${s.date||''}</span></div><div class="mt-2 font-semibold text-sm">${s.text}</div><div class="mt-2 flex gap-2"><a href="https://wa.me/?text=${wa}" target="_blank" class="text- font-bold px-3 py-1 rounded-full bg-green-500 text-white">📱 Partager</a></div></div>`});
+ document.getElementById('list').innerHTML=h;
+ let ah=""; allData.forEach(s=>{ah+=`<div class="py-3 flex justify-between"><div><div class="text-xs text-slate-400">${s.date||''}</div><div class="text-sm font-semibold">${s.text}</div></div><button onclick="del(${s.id})" class="px-3 py-1 rounded-full bg-red-50 text-red-600 text-xs font-bold">Supprimer</button></div>`});
+ document.getElementById('adminList').innerHTML=ah;
+}
+function send(){let t=document.getElementById('txt').value.trim(); if(!t) return; fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t})}).then(r=>r.json()).then(res=>{if(res.all){allData=res.all; render(); updateMap();} document.getElementById('txt').value='';});}
 function openAdmin(){if(localStorage.getItem('admin')==='1'){document.getElementById('adminModal').classList.remove('hidden'); load();} else document.getElementById('loginModal').classList.remove('hidden');}
 function closeAdmin(){document.getElementById('adminModal').classList.add('hidden');}
 function doLogin(){let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{if(res.status==='ok'){localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); load();} else alert('Mauvais mdp');});}
 function del(id){if(!confirm('Supprimer?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load());}
 function logout(){localStorage.removeItem('admin'); closeAdmin();}
-load(); setInterval(load,5000);
+initMap(); load(); setInterval(load,8000);
 </script>
-<footer class="text-center py-8 text- font-bold text-slate-400 tracking-[0.2em]">RESEAU ESPOIR CITOYEN © 2026 • <span id="footerCount">0</span> SIGNALEMENTS À VIE • ABIDJAN</footer>
-<script>setInterval(()=>{let c=allData.length; let f=document.getElementById('footerCount'); if(f) f.innerText=c;},1000);</script>
 </body></html>
