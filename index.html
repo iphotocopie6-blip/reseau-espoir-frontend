@@ -1,115 +1,67 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RESEAU ESPOIR V20.1</title>
+<html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RESEAU ESPOIR CITOYEN - V18.5 Côte d'Ivoire</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#f97316"/>
+<link rel="icon" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="icon-512.png"/>
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>#map{height:380px;border-radius:12px}</style>
-</head>
-<body class="bg-gray-50">
-<header class="bg-white shadow p-3 flex justify-between items-center sticky top-0 z-50">
-<div class="flex items-center gap-2"><div class="bg-orange-500 text-white w-8 h-8 rounded flex items-center justify-center font-bold">RE</div><div><b>RESEAU ESPOIR</b><div class="text-xs text-orange-500 font-bold">V20.1 SECURE + LIKE + SCROLL FIX</div></div></div>
-<div class="flex gap-2"><button onclick="doLogin()" class="bg-black text-white px-3 py-1 rounded-full text-sm">🔐 Admin</button><span id="adminCount" class="bg-orange-100 px-2 py-1 rounded-full text-sm">0</span></div>
-</header>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>#map{height:360px;border-radius:20px;z-index:1} #preview{max-height:200px;border-radius:12px;border:2px solid #f97316}</style></head>
+<body class="bg-[#f5f7f9]">
+<header class="sticky top-0 bg-white/95 backdrop-blur border-b z-[1000] shadow-sm"><div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+<div class="flex gap-3 items-center"><img src="icon-192.png" class="w-10 h-10 rounded-xl shadow-md"/><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- text-orange-500">CITOYEN • CÔTE D'IVOIRE</div><div class="text- tracking-widest text-slate-400 font-bold">V18.5 PHOTO + MAP + LIKE + INSTALL</div></div></div>
+<div class="flex gap-2"><button id="installBtn" class="hidden px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-extrabold text- animate-pulse shadow-lg">📲 INSTALLER</button><button onclick="openAdmin()" class="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold">🔐 Admin</button></div></header>
 
-<div class="max-w-6xl mx-auto p-3 grid md:grid-cols-2 gap-4">
-<div>
-<div class="bg-white rounded-xl p-4 shadow">
-<h3 class="font-bold mb-2">📸 Signaler</h3>
-<textarea id="txt" placeholder="Ex: Eau usée Agbekoi..." class="w-full border rounded-lg p-2 h-20"></textarea>
-<div class="mt-2 border-2 border-dashed rounded-lg p-3 text-center bg-orange-50">
-<input type="file" id="photoInput" accept="image/*" hidden onchange="previewPhoto(this)">
-<button onclick="document.getElementById('photoInput').click()" class="text-sm">📷 Ajouter photo</button>
-<img id="preview" class="hidden w-full mt-2 rounded-lg max-h-40 object-cover">
-</div>
-<button onclick="envoyer()" class="w-full bg-black text-white mt-3 py-2 rounded-full font-bold">Envoyer →</button>
-</div>
-<div id="map" class="mt-4"></div>
-</div>
-<div><div id="list" class="space-y-3"></div></div>
+<div id="iosBanner" class="hidden bg-orange-500 text-white text-center p-2 text-xs font-bold">📲 iPhone: Partager ⬆️ > Sur l'écran d'accueil</div>
+
+<div class="max-w-6xl mx-auto px-4 mt-4 grid grid-cols-3 gap-2">
+<div class="bg-slate-900 rounded-xl p-3 text-white text-center"><div class="text- opacity-60">TOTAL</div><div id="statTotal" class="text-xl font-extrabold">0</div></div>
+<div class="bg-orange-500 rounded-xl p-3 text-white text-center"><div class="text-">CÔTE D'IVOIRE</div><div class="text- font-extrabold">🇨🇮 LIVE</div></div>
+<div class="bg-green-600 rounded-xl p-3 text-white text-center"><div class="text-">INTERACTIONS</div><div class="text- font-extrabold">❤️ 💬 ↗️</div></div>
 </div>
 
-<!-- ADMIN PANEL AVEC SCROLL FIX -->
-<div id="adminPanel" class="hidden fixed top-0 right-0 w- h-screen bg-white z-[9999] shadow-2xl flex flex-col">
-<div class="p-3 border-b flex justify-between items-center bg-black text-white">
-<b>Admin - Signalements</b><button onclick="document.getElementById('adminPanel').classList.add('hidden')" class="bg-white text-black px-2 rounded">X</button>
+<main class="max-w-6xl mx-auto p-4 grid md:grid-cols-[380px_1fr] gap-4">
+<div class="space-y-4">
+<div class="bg-white rounded-2xl p-4 border shadow-sm"><h3 class="font-bold text-sm">📸 Signaler avec photo</h3><textarea id="txt" class="w-full mt-2 h-20 p-3 bg-slate-50 border rounded-xl text-sm" placeholder="Ex: Eau usée Agbekoi, Cocody..."></textarea><label class="mt-2 flex flex-col items-center p-3 bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl cursor-pointer hover:bg-orange-100"><span class="text-xs font-bold text-orange-600">📷 Ajouter photo (auto 500px)</span><input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/></label><img id="preview" class="hidden mt-2 w-full object-cover shadow"/><div id="photoInfo" class="hidden text- font-bold text-green-600 mt-1"></div><button onclick="send()" id="sendBtn" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold text-sm">Envoyer avec photo →</button><div id="status" class="text- font-bold mt-2"></div></div>
+<div class="bg-white rounded-2xl p-3 border shadow-sm"><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-xs">🗺️ Carte Côte d'Ivoire - Cocody</h3><span class="text- bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-bold">📸 LIVE MAP</span></div><div id="map"></div></div>
 </div>
-<div id="adminList" class="flex-1 overflow-y-auto p-3 space-y-2" style="max-height:85vh; overflow-y:auto;"></div>
-<div class="p-3 border-t text-xs text-gray-500">Molette pour scroller • <span id="adminTotal">0</span> posts</div>
-</div>
+<div class="bg-white rounded-2xl p-4 border shadow-sm"><div class="flex justify-between items-center"><h3 class="font-bold text-sm">Fil public 🇨🇮 (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100">↻ Actualiser</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto pr-1"></div></div>
+</main>
+
+<div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-xs"><h3 class="font-bold">Admin</h3><input id="pass" type="password" placeholder="civ2024" class="w-full mt-3 p-3 border rounded-xl"/><button onclick="doLogin()" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold">Se connecter</button></div></div>
+<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-4 rounded-2xl w-full max-w-lg max-h- overflow-auto"><div class="flex justify-between"><b>Admin - <span id="adminCount">0</span></b><button onclick="document.getElementById('adminModal').classList.add('hidden')" class="bg-slate-100 px-3 py-1 rounded-full text-xs">X</button></div><div id="adminList" class="mt-2 divide-y"></div></div></div>
 
 <script>
-const API = 'https://reseau-espoir-backend.onrender.com';
-let allData=[]; let photoBase64=null;
-const map = L.map('map').setView([5.345, -4.024], 11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-function previewPhoto(input){
-  if(input.files && input.files[0]){
-    const reader = new FileReader();
-    reader.onload = e=>{
-      photoBase64 = e.target.result;
-      const img=document.getElementById('preview');
-      img.src=photoBase64; img.classList.remove('hidden');
-    };
-    reader.readAsDataURL(input.files[0]);
-  }
-}
-async function envoyer(){
-  const text=document.getElementById('txt').value.trim();
-  if(!text) return alert('Écris quelque chose');
-  const btn=document.querySelector('button[onclick="envoyer()"]');
-  btn.innerText='Envoi...'; btn.disabled=true;
-  try{
-    const r=await fetch(API, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text, photo: photoBase64})});
-    const j=await r.json();
-    if(j.all){ allData=j.all; render(); document.getElementById('txt').value=''; photoBase64=null; document.getElementById('preview').classList.add('hidden'); }
-  }catch(e){ alert('Erreur: '+e.message); }
-  btn.innerText='Envoyer →'; btn.disabled=false;
-}
-async function load(){
-  const r=await fetch(API+'/?signalements'); allData=await r.json(); render();
-  document.getElementById('adminCount').innerText=allData.length;
-}
+const API="https://reseau-espoir-backend.onrender.com"; let allData=[], map, markers=[], currentBase64=null;
+function initMap(){ map=L.map('map').setView([5.359,-3.983],13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); }
+function updateMap(){ markers.forEach(m=>map.removeLayer(m)); markers=[]; allData.forEach((s,i)=>{ let lat=5.359+(Math.random()-0.5)*0.06, lng=-3.983+(Math.random()-0.5)*0.06; let photo=getPhotoUrl(s.text); let icon=L.divIcon({html:`<div style='background:${photo?'#f97316':'#ef4444'};width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)'>${photo?'📸':i+1}</div>`,className:''}); let m=L.marker([lat,lng],{icon}).addTo(map); markers.push(m); }); if(markers.length>0){ let g=L.featureGroup(markers); map.fitBounds(g.getBounds().pad(0.3)); } }
+function getPhotoUrl(text){ if(!text) return null; let m=text.match(/\[PHOTO\](data:image\/[^;]+;base64,[^\s]+)/); return m?m[1]:null; }
+function getTextOnly(text){ if(!text) return ''; return text.replace(/\[PHOTO\]data:image\/[^;]+;base64,[^\s]+/,'').trim(); }
+function getLikes(id){ return JSON.parse(localStorage.getItem('likes_'+id)||'{"count":0,"liked":false}'); }
+function toggleLike(id){ let d=getLikes(id); d.liked? (d.count--, d.liked=false) : (d.count++, d.liked=true); localStorage.setItem('likes_'+id, JSON.stringify(d)); render(); }
+function getComments(id){ return JSON.parse(localStorage.getItem('comments_'+id)||'[]'); }
+function addComment(id){ let input=document.getElementById('commentInput_'+id); let txt=input.value.trim(); if(!txt) return; let c=getComments(id); c.push({text:txt,date:new Date().toLocaleDateString()}); localStorage.setItem('comments_'+id, JSON.stringify(c)); input.value=''; render(); document.getElementById('comments_'+id).classList.remove('hidden'); }
+function toggleComments(id){ document.getElementById('comments_'+id).classList.toggle('hidden'); }
+function sharePost(id, txt){ let url=window.location.href; if(navigator.share){ navigator.share({title:'Réseau Espoir',text:txt,url}); } else { navigator.clipboard.writeText(txt+' '+url); alert('Lien copié!'); } }
+function previewPhoto(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ const img=new Image(); img.onload=()=>{ const canvas=document.createElement('canvas'); let maxW=500,w=img.width,h=img.height; if(w>maxW){h=h*maxW/w;w=maxW;} canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h); currentBase64=canvas.toDataURL('image/jpeg',0.5); document.getElementById('preview').src=currentBase64; document.getElementById('preview').classList.remove('hidden'); document.getElementById('photoInfo').classList.remove('hidden'); document.getElementById('photoInfo').innerText=`✅ ${(currentBase64.length/1024).toFixed(0)}KB prête`; }; img.src=ev.target.result; }; reader.readAsDataURL(file); }
+function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d; render(); updateMap(); } }); }
 function render(){
-  const c=document.getElementById('list'); c.innerHTML='';
-  const adminC=document.getElementById('adminList'); if(adminC) adminC.innerHTML='';
-  allData.forEach((item,i)=>{
-    const div=document.createElement('div');
-    div.className='bg-white rounded-xl p-3 shadow';
-    div.innerHTML=`<div class="text-sm">${item.text}</div>${item.photo?`<img src="${item.photo}" class="w-full mt-2 rounded-lg max-h-48 object-cover">`:''}<div class="text-xs text-gray-400 mt-1">${item.date||''}</div>`;
-    c.appendChild(div);
-    if(adminC){
-      const a=document.createElement('div');
-      a.className='border p-2 rounded flex justify-between items-center gap-2';
-      a.innerHTML=`<div class="flex-1"><div class="text-sm truncate">${item.text.substring(0,40)}</div><div class="text-xs text-gray-400">${item.date||''} • ID:${item.id}</div></div><button onclick="del(${item.id})" class="bg-red-500 text-white px-3 py-1 rounded-full text-xs">Supprimer</button>`;
-      adminC.appendChild(a);
-    }
-  });
-  document.getElementById('adminTotal').innerText=allData.length;
+  document.getElementById('count').innerText=allData.length; document.getElementById('statTotal').innerText=allData.length; document.getElementById('adminCount').innerText=allData.length;
+  let h=""; allData.forEach((s,i)=>{ let photo=getPhotoUrl(s.text); let txt=getTextOnly(s.text); let likes=getLikes(s.id); let comments=getComments(s.id); let img=photo?`<img src='${photo}' class='mt-2 w-full h-56 object-cover rounded-xl border-2 border-orange-100'/>`:'<div class="text- text-slate-400 mt-1 italic">Pas de photo</div>';
+  h+=`<div class="p-4 rounded-2xl bg-slate-50 border"><div class="flex justify-between text-"><span class="font-bold text-orange-600">#${i+1} 📸 • Côte d'Ivoire</span><span class="text-slate-400">${s.date||''}</span></div><div class="mt-1 font-semibold text-sm">${txt}</div>${img}
+  <div class="mt-3 flex gap-3 text- font-bold border-t pt-2"><button onclick="toggleLike(${s.id})" class="${likes.liked?'text-orange-600':'text-slate-500'} flex gap-1 hover:bg-white px-3 py-1.5 rounded-full transition">❤️ J'aime ${likes.count>0?`(${likes.count})`:''}</button><button onclick="toggleComments(${s.id})" class="text-slate-500 flex gap-1 hover:bg-white px-3 py-1.5 rounded-full">💬 Commenter ${comments.length>0?`(${comments.length})`:''}</button><button onclick="sharePost(${s.id},'${txt.replace(/'/g,"").substring(0,60)}')" class="text-slate-500 flex gap-1 hover:bg-white px-3 py-1.5 rounded-full">↗️ Partager</button></div>
+  <div id="comments_${s.id}" class="hidden mt-3 space-y-2 bg-white p-3 rounded-xl border"><div class="space-y-2">${comments.map(c=>`<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> ${c.text}<div class="text- text-slate-400">${c.date}</div></div>`).join('')||'<div class="text- text-slate-400">Pas de commentaires</div>'}</div><div class="flex gap-2"><input id="commentInput_${s.id}" placeholder="Écrire un commentaire..." class="flex-1 p-2 rounded-full bg-slate-50 border text-xs"/><button onclick="addComment(${s.id})" class="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold">Envoyer</button></div></div></div>`; });
+  document.getElementById('list').innerHTML=h||'Aucun signalement'; let ah=""; allData.forEach(s=>{ ah+=`<div class="py-2 flex justify-between text-sm"><span>${getTextOnly(s.text).substring(0,35)}</span><button onclick="del(${s.id})" class="text-xs bg-red-50 text-red-600 px-2 rounded-full">Supp</button></div>`; }); document.getElementById('adminList').innerHTML=ah;
 }
-async function doLogin(){
-  if(localStorage.getItem('admin')==='1'){ document.getElementById('adminPanel').classList.remove('hidden'); return; }
-  const p=prompt('Mot de passe admin:');
-  if(!p) return;
-  const r=await fetch(API+'/?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})});
-  const j=await r.json();
-  if(j.status==='ok'){ localStorage.setItem('admin','1'); localStorage.setItem('admin_token', j.token); document.getElementById('adminPanel').classList.remove('hidden'); }
-  else alert('Mauvais mdp');
-}
-async function del(id){
-  if(!confirm('Supprimer ID '+id+'?')) return;
-  const token = localStorage.getItem('admin_token') || 'Galilee2026!';
-  try{
-    const r=await fetch(API+'/?delete',{method:'POST',headers:{'Content-Type':'application/json'},body: JSON.stringify({id, password: token, token: token})});
-    const j=await r.json();
-    if(j.error) alert('Erreur: '+j.error);
-    else { allData=j.all||[]; render(); document.getElementById('adminCount').innerText=allData.length; }
-  }catch(e){ alert('Erreur réseau: '+e.message); }
-}
-load();
+async function send(){ let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris'); let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi...'; try{ let finalText=t+(currentBase64?` [PHOTO]${currentBase64}`:''); let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:finalText})}); let res=await r.json(); if(res.all){ allData=res.all; render(); updateMap(); } document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); document.getElementById('photoInfo').classList.add('hidden'); btn.innerText='Envoyer avec photo →'; }catch(e){ btn.innerText='Erreur'; } btn.disabled=false; }
+function openAdmin(){ if(localStorage.getItem('admin')==='1') document.getElementById('adminModal').classList.remove('hidden'); else document.getElementById('loginModal').classList.remove('hidden'); }
+function doLogin(){ let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{ if(res.status==='ok'){ localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); } else alert('faux'); }); }
+function del(id){ if(!confirm('Supp?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load()); }
+let deferredPrompt; window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').classList.remove('hidden'); });
+document.getElementById('installBtn').addEventListener('click', async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted') document.getElementById('installBtn').innerText='✅ Installée!'; deferredPrompt=null; } else { alert('Android: ⋮ > Installer\n\niPhone: Partager ⬆️ > Sur écran d accueil'); } });
+if(/iPhone|iPad|iPod/.test(navigator.userAgent)) document.getElementById('iosBanner').classList.remove('hidden');
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+initMap(); load(); setInterval(load,8000);
 </script>
-</body>
-</html>
+</body></html>
