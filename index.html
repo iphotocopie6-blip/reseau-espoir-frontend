@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RESEAU ESPOIR CITOYEN - V18.4 Interactions</title>
+<title>RESEAU ESPOIR CITOYEN - V19.6 SECURE</title>
 <link rel="manifest" href="manifest.json"/><meta name="theme-color" content="#f97316"/>
+<link rel="icon" href="icon-192.png"/><link rel="apple-touch-icon" href="icon-512.png"/>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>#map{height:340px;border-radius:20px} #preview{max-height:180px;border-radius:12px;border:2px solid #f97316}</style></head>
 <body class="bg-[#f5f7f9]">
-<header class="sticky top-0 bg-white/95 backdrop-blur border-b z-[1000]"><div class="max-w-6xl mx-auto px-4 h-14 flex justify-between items-center"><div class="flex gap-2 items-center"><div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center text-white font-extrabold">RE</div><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- text-orange-500">V18.4 LIKE + COMMENT</div></div></div><div class="flex gap-2"><button id="installBtn" class="hidden px-3 py-2 rounded-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-bold text-">📲 INSTALLER</button><button onclick="openAdmin()" class="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold">🔐 Admin</button></div></div></header>
+<header class="sticky top-0 bg-white/95 backdrop-blur border-b z-[1000]"><div class="max-w-6xl mx-auto px-4 h-14 flex justify-between items-center"><div class="flex gap-2 items-center"><img src="icon-192.png" onerror="this.style.display='none'" class="w-9 h-9 rounded-xl"/><div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-green-600 flex items-center justify-center text-white font-extrabold">RE</div><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- text-orange-500">V19.6 SECURE + LIKE</div></div></div><div class="flex gap-2"><button id="installBtn" class="hidden px-3 py-2 rounded-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-bold text-">📲 INSTALLER</button><button onclick="openAdmin()" class="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold">🔐 Admin</button></div></div></header>
 <main class="max-w-6xl mx-auto p-4 grid md:grid-cols-[380px_1fr] gap-4">
 <div class="space-y-4">
 <div class="bg-white rounded-2xl p-4 border shadow-sm"><h3 class="font-bold text-sm">📸 Signaler</h3><textarea id="txt" class="w-full mt-2 h-20 p-3 bg-slate-50 border rounded-xl text-sm" placeholder="Ex: Eau usée Agbekoi..."></textarea><label class="mt-2 flex flex-col items-center p-3 bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl cursor-pointer"><span class="text- font-bold text-orange-600">📷 Ajouter photo</span><input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/></label><img id="preview" class="hidden mt-2 w-full object-cover"/><div id="photoInfo" class="hidden text- font-bold text-green-600 mt-1"></div><button onclick="send()" id="sendBtn" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold text-sm">Envoyer →</button><div id="status" class="text- font-bold mt-2"></div></div>
@@ -14,26 +15,43 @@
 </div>
 <div class="bg-white rounded-2xl p-4 border shadow-sm"><div class="flex justify-between"><h3 class="font-bold text-sm">Fil Côte d'Ivoire (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs bg-slate-100 px-2 py-1 rounded-full">↻</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto"></div></div>
 </main>
-<div id="loginModal" class="hidden fixed inset-0 bg-black/50 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-5 rounded-2xl w-full max-w-xs"><input id="pass" type="password" placeholder="civ2024" class="w-full p-3 border rounded-xl"/><button onclick="doLogin()" class="w-full mt-2 p-3 bg-slate-900 text-white rounded-xl font-bold">OK</button></div></div>
-<div id="adminModal" class="hidden fixed inset-0 bg-black/50 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-4 rounded-2xl w-full max-w-lg max-h- overflow-auto"><div class="flex justify-between"><b>Admin</b><button onclick="document.getElementById('adminModal').classList.add('hidden')" class="bg-slate-100 px-3 py-1 rounded-full">X</button></div><div id="adminList" class="mt-2 divide-y"></div></div></div>
+<div id="loginModal" class="hidden fixed inset-0 bg-black/50 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-5 rounded-2xl w-full max-w-xs"><h3 class="font-bold text-sm mb-2">🔐 Connexion sécurisée</h3><input id="pass" type="password" placeholder="Nouveau mot de passe" class="w-full p-3 border rounded-xl"/><div class="text- text-slate-400 mt-1">Ancien civ2024 désactivé</div><button onclick="doLogin()" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold">Se connecter</button><button onclick="document.getElementById('loginModal').classList.add('hidden')" class="w-full mt-2 text-xs">Annuler</button></div></div>
+<div id="adminModal" class="hidden fixed inset-0 bg-black/50 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-4 rounded-2xl w-full max-w-lg max-h- overflow-auto"><div class="flex justify-between"><b>Admin sécurisé - <span id="adminCount">0</span></b><div class="flex gap-2"><button onclick="logout()" class="bg-orange-100 text-orange-600 px-2 py-1 rounded-full text-xs">Déconnexion</button><button onclick="document.getElementById('adminModal').classList.add('hidden')" class="bg-slate-100 px-3 py-1 rounded-full">X</button></div></div><div id="adminList" class="mt-2 divide-y"></div></div></div>
 <script>
 const API="https://reseau-espoir-backend.onrender.com"; let allData=[], map, markers=[], currentBase64=null;
+
 function initMap(){ map=L.map('map').setView([5.359,-3.983],13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); }
-function updateMap(){ markers.forEach(m=>map.removeLayer(m)); markers=[]; allData.forEach((s,i)=>{ let lat=5.359+(Math.random()-0.5)*0.06, lng=-3.983+(Math.random()-0.5)*0.06; let photo=getPhotoUrl(s.text); let icon=L.divIcon({html:`<div style='background:${photo?'#f97316':'#ef4444'};width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:2px solid white'>${photo?'📸':i+1}</div>`,className:''}); let m=L.marker([lat,lng],{icon}).addTo(map); markers.push(m); }); }
-function getPhotoUrl(text){ let m=text.match(/\[PHOTO\](data:image\/[^;]+;base64,[^\s]+)/); return m?m[1]:null; }
-function getTextOnly(text){ return text.replace(/\[PHOTO\]data:image\/[^;]+;base64,[^\s]+/,'').trim(); }
+function updateMap(){ markers.forEach(m=>map.removeLayer(m)); markers=[]; allData.forEach((s,i)=>{ let lat=5.359+(Math.random()-0.5)*0.06, lng=-3.983+(Math.random()-0.5)*0.06; let photo=getPhotoUrl(s); let icon=L.divIcon({html:`<div style='background:${photo?'#f97316':'#ef4444'};width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:2px solid white'>${photo?'📸':i+1}</div>`,className:''}); let m=L.marker([lat,lng],{icon}).addTo(map); markers.push(m); }); }
+
+// SÉCURISÉ + COMPATIBLE ANCIEN/Nouveau backend
+function getPhotoUrl(s){
+  if(!s) return null;
+  if(s.photo) return s.photo; // Nouveau backend V19 avec colonne photo
+  let m=s.text?.match(/\[PHOTO\](data:image\/[^;]+;base64,[^\s]+)/); // Ancien backend V17-V18
+  return m?m[1]:null;
+}
+function getTextOnly(s){
+  if(!s) return '';
+  let t=s.text||'';
+  return t.replace(/\[PHOTO\]data:image\/[^;]+;base64,[^\s]+/,'').trim();
+}
+
 function getLikes(id){ return JSON.parse(localStorage.getItem('likes_'+id)||'{"count":0,"liked":false}'); }
 function toggleLike(id){ let d=getLikes(id); if(d.liked){ d.count--; d.liked=false; } else { d.count++; d.liked=true; } localStorage.setItem('likes_'+id, JSON.stringify(d)); render(); }
 function getComments(id){ return JSON.parse(localStorage.getItem('comments_'+id)||'[]'); }
 function addComment(id){ let input=document.getElementById('commentInput_'+id); let txt=input.value.trim(); if(!txt) return; let c=getComments(id); c.push({text:txt,date:new Date().toLocaleDateString()}); localStorage.setItem('comments_'+id, JSON.stringify(c)); input.value=''; render(); document.getElementById('comments_'+id).classList.remove('hidden'); }
 function toggleComments(id){ let el=document.getElementById('comments_'+id); el.classList.toggle('hidden'); }
-function sharePost(id, textOnly){ let photo=getPhotoUrl(allData.find(x=>x.id==id)?.text||''); let url=window.location.href; if(navigator.share){ navigator.share({title:'Réseau Espoir Citoyen',text:textOnly,url:url}); } else { navigator.clipboard.writeText(textOnly+' '+url); alert('Lien copié!'); } }
+function sharePost(id, textOnly){ let url=window.location.href; if(navigator.share){ navigator.share({title:'Réseau Espoir Citoyen',text:textOnly,url:url}); } else { navigator.clipboard.writeText(textOnly+' '+url); alert('Lien copié!'); } }
+
 function previewPhoto(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ const img=new Image(); img.onload=()=>{ const canvas=document.createElement('canvas'); let maxW=500,w=img.width,h=img.height; if(w>maxW){h=h*maxW/w;w=maxW;} canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h); currentBase64=canvas.toDataURL('image/jpeg',0.5); document.getElementById('preview').src=currentBase64; document.getElementById('preview').classList.remove('hidden'); document.getElementById('photoInfo').classList.remove('hidden'); document.getElementById('photoInfo').innerText=`✅ ${(currentBase64.length/1024).toFixed(0)}KB prête`; }; img.src=ev.target.result; }; reader.readAsDataURL(file); }
+
 function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d; render(); updateMap(); } }); }
+
 function render(){
   document.getElementById('count').innerText=allData.length;
+  const adminCountEl=document.getElementById('adminCount'); if(adminCountEl) adminCountEl.innerText=allData.length;
   let h=""; allData.forEach((s,i)=>{
-    let photo=getPhotoUrl(s.text); let txt=getTextOnly(s.text);
+    let photo=getPhotoUrl(s); let txt=getTextOnly(s);
     let likes=getLikes(s.id); let comments=getComments(s.id);
     let img=photo?`<img src='${photo}' class='mt-2 w-full h-56 object-cover rounded-xl border'/>`:'';
     h+=`<div class="p-4 rounded-2xl bg-slate-50 border">
@@ -51,12 +69,55 @@ function render(){
       </div>
     </div>`;
   }); document.getElementById('list').innerHTML=h||'Vide';
+
+  // Admin list sécurisé
+  let ah=""; allData.forEach(s=>{ ah+=`<div class="py-2 flex justify-between text-sm items-center"><span>${getTextOnly(s).substring(0,30)}</span><button onclick="del(${s.id})" class="text-xs bg-red-500 text-white px-3 py-1 rounded-full">Supprimer</button></div>`; });
+  document.getElementById('adminList').innerHTML=ah||'Vide';
 }
-async function send(){ let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris'); let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳'; try{ let finalText=t+(currentBase64?` [PHOTO]${currentBase64}`:''); let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:finalText})}); let res=await r.json(); if(res.all){ allData=res.all; render(); updateMap(); } document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); btn.innerText='Envoyer →'; }catch(e){ btn.innerText='Erreur'; } btn.disabled=false; }
-function openAdmin(){ if(localStorage.getItem('admin')==='1') document.getElementById('adminModal').classList.remove('hidden'); else document.getElementById('loginModal').classList.remove('hidden'); }
-function doLogin(){ let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{ if(res.status==='ok'){ localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); } else alert('faux'); }); }
+
+async function send(){
+  let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris quelque chose');
+  let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi...';
+  try{
+    // Envoie compatible ancien (text+photo dans texte) ET nouveau (colonne photo)
+    let payload = {text: t, photo: currentBase64};
+    // Pour compat ancien backend qui attend [PHOTO] dans texte, on garde aussi
+    if(currentBase64) payload.text = t + ` [PHOTO]${currentBase64}`;
+    let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    let res=await r.json(); if(res.all){ allData=res.all; render(); updateMap(); } else { load(); }
+    document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); document.getElementById('photoInfo').classList.add('hidden'); document.getElementById('status').innerText='✅ Envoyé!';
+  }catch(e){ document.getElementById('status').innerText='❌ Erreur'; }
+  btn.disabled=false; btn.innerText='Envoyer →';
+}
+
+function openAdmin(){ if(localStorage.getItem('admin')==='1' && localStorage.getItem('admin_token')) document.getElementById('adminModal').classList.remove('hidden'); else document.getElementById('loginModal').classList.remove('hidden'); }
+function logout(){ localStorage.removeItem('admin'); localStorage.removeItem('admin_token'); document.getElementById('adminModal').classList.add('hidden'); alert('Déconnecté'); }
+
+function doLogin(){
+  let p=document.getElementById('pass').value;
+  fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})})
+ .then(r=>r.json()).then(res=>{
+    if(res.status==='ok'){
+      localStorage.setItem('admin','1');
+      localStorage.setItem('admin_token', res.token||'ok');
+      document.getElementById('loginModal').classList.add('hidden');
+      document.getElementById('adminModal').classList.remove('hidden');
+      load();
+    } else alert('Mot de passe incorrect - Contacte l admin');
+  }).catch(()=>alert('Backend hors ligne'));
+}
+
+function del(id){
+  if(!confirm('Supprimer ce signalement?')) return;
+  let token = localStorage.getItem('admin_token');
+  fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json','x-admin-token':token},body:JSON.stringify({id, token})})
+ .then(r=>r.json()).then(res=>{ if(res.all){ allData=res.all; render(); updateMap(); } else load(); })
+ .catch(()=>alert('Erreur suppression - token expiré, reconnecte-toi'));
+}
+
 let deferredPrompt; window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').classList.remove('hidden'); });
 document.getElementById('installBtn').addEventListener('click', async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; } });
+
 initMap(); load();
 </script>
 </body></html>
