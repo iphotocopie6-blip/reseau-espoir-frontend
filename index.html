@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RESEAU ESPOIR CITOYEN - V18.5 Côte d'Ivoire</title>
+<title>RESEAU ESPOIR CITOYEN - V18.7 Côte d'Ivoire</title>
 <link rel="manifest" href="manifest.json?v=21"/>
 <meta name="theme-color" content="#f97316"/>
 <link rel="icon" href="icon-192.png"/>
 <link rel="apple-touch-icon" href="icon-512.png"/>
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>#map{height:360px;border-radius:20px;z-index:1} #preview{max-height:200px;border-radius:12px;border:2px solid #f97316}</style></head>
+<style>#preview{max-height:200px;border-radius:12px;border:2px solid #f97316}</style></head>
 <body class="bg-[#f5f7f9]">
 <header class="sticky top-0 bg-white/95 backdrop-blur border-b z-[1000] shadow-sm"><div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
-<div class="flex gap-3 items-center"><img src="icon-192.png" class="w-10 h-10 rounded-xl shadow-md"/><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- text-orange-500">CITOYEN • CÔTE D'IVOIRE</div><div class="text- tracking-widest text-slate-400 font-bold">V18.5 PHOTO + MAP + LIKE + INSTALL</div></div></div>
+<div class="flex gap-3 items-center"><img src="icon-192.png" class="w-10 h-10 rounded-xl shadow-md"/><div class="leading-none"><div class="font-extrabold text-">RESEAU ESPOIR</div><div class="font-extrabold text- text-orange-500">CITOYEN • CÔTE D'IVOIRE</div><div class="text- tracking-widest text-slate-400 font-bold">V18.7 PHOTO + LIKE + INSTALL</div></div></div>
 <div class="flex gap-2"><button id="installBtn" class="px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-extrabold text-xs animate-pulse shadow-lg">📲 INSTALLER</button><button onclick="openAdmin()" class="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold">🔐 Admin</button></div></header>
 
 <div id="iosBanner" class="hidden bg-orange-500 text-white text-center p-2 text-xs font-bold">📲 iPhone: Partager ⬆ > Sur l'écran d'accueil</div>
@@ -24,7 +23,6 @@
 <main class="max-w-6xl mx-auto p-4 grid md:grid-cols-[380px_1fr] gap-4">
 <div class="space-y-4">
 <div class="bg-white rounded-2xl p-4 border shadow-sm"><h3 class="font-bold text-sm">📸 Signaler avec photo</h3><textarea id="txt" class="w-full mt-2 h-20 p-3 bg-slate-50 border rounded-xl text-sm" placeholder="Ex: Eau usée Agbekoi, Cocody..."></textarea><label class="mt-2 flex flex-col items-center p-3 bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl cursor-pointer hover:bg-orange-100"><span class="text-xs font-bold text-orange-600">📷 Ajouter photo (auto 500px)</span><input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/></label><img id="preview" class="hidden mt-2 w-full object-cover shadow"/><div id="photoInfo" class="hidden text- font-bold text-green-600 mt-1"></div><button onclick="send()" id="sendBtn" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold text-sm">Envoyer avec photo →</button><div id="status" class="text- font-bold mt-2"></div></div>
-<div class="bg-white rounded-2xl p-3 border shadow-sm"><div class="flex justify-between items-center mb-2"><h3 class="font-bold text-xs">🗺 Carte Côte d'Ivoire - Cocody</h3><span class="text- bg-orange-100 text-orange-600 px-2 py-1 rounded-full font-bold">📸 LIVE MAP</span></div><div id="map"></div></div>
 </div>
 <div class="bg-white rounded-2xl p-4 border shadow-sm"><div class="flex justify-between items-center"><h3 class="font-bold text-sm">Fil public 🇨🇮 (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100">↻ Actualiser</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto pr-1"></div></div>
 </main>
@@ -33,9 +31,7 @@
 <div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-4 rounded-2xl w-full max-w-lg max-h- overflow-auto"><div class="flex justify-between"><b>Admin - <span id="adminCount">0</span></b><button onclick="document.getElementById('adminModal').classList.add('hidden')" class="bg-slate-100 px-3 py-1 rounded-full text-xs">X</button></div><div id="adminList" class="mt-2 divide-y"></div></div></div>
 
 <script>
-const API="https://reseau-espoir-backend.onrender.com"; let allData=[], map, markers=[], currentBase64=null;
-function initMap(){ map=L.map('map').setView([5.359,-3.983],13); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map); }
-function updateMap(){ markers.forEach(m=>map.removeLayer(m)); markers=[]; allData.forEach((s,i)=>{ let lat=5.359+(Math.random()-0.5)*0.06, lng=-3.983+(Math.random()-0.5)*0.06; let photo=getPhotoUrl(s.text); let icon=L.divIcon({html:`<div style='background:${photo?'#f97316':'#ef4444'};width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.3)'>${photo?'📸':i+1}</div>`,className:''}); let m=L.marker([lat,lng],{icon}).addTo(map); markers.push(m); }); if(markers.length>0){ let g=L.featureGroup(markers); map.fitBounds(g.getBounds().pad(0.3)); } }
+const API="https://reseau-espoir-backend.onrender.com"; let allData=[], currentBase64=null;
 function getPhotoUrl(text){ if(!text) return null; let m=text.match(/\[PHOTO\](data:image\/[^;]+;base64,[^\s]+)/); return m?m[1]:null; }
 function getTextOnly(text){ if(!text) return ''; return text.replace(/\[PHOTO\]data:image\/[^;]+;base64,[^\s]+/,'').trim(); }
 function getLikes(id){ return JSON.parse(localStorage.getItem('likes_'+id)||'{"count":0,"liked":false}'); }
@@ -46,7 +42,7 @@ function addComment(id){ let input=document.getElementById('commentInput_'+id); 
 function toggleComments(id){ let el=document.getElementById('comments_'+id); if(!el) return; if(openComments.has(id)){ openComments.delete(id); el.classList.add('hidden'); } else { openComments.add(id); el.classList.remove('hidden'); } }
 function sharePost(id, txt){ let url=window.location.href; if(navigator.share){ navigator.share({title:'Réseau Espoir',text:txt,url}); } else { navigator.clipboard.writeText(txt+' '+url); alert('Lien copié!'); } }
 function previewPhoto(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ const img=new Image(); img.onload=()=>{ const canvas=document.createElement('canvas'); let maxW=500,w=img.width,h=img.height; if(w>maxW){h=h*maxW/w;w=maxW;} canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h); currentBase64=canvas.toDataURL('image/jpeg',0.5); document.getElementById('preview').src=currentBase64; document.getElementById('preview').classList.remove('hidden'); document.getElementById('photoInfo').classList.remove('hidden'); document.getElementById('photoInfo').innerText=`✅ ${(currentBase64.length/1024).toFixed(0)}KB prête`; }; img.src=ev.target.result; }; reader.readAsDataURL(file); }
-function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d; render(); updateMap(); } }); }
+function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d; render(); } }); }
 function render(){
   document.getElementById('count').innerText=allData.length; document.getElementById('statTotal').innerText=allData.length; document.getElementById('adminCount').innerText=allData.length;
   let h=""; allData.forEach((s,i)=>{ let photo=getPhotoUrl(s.text); let txt=getTextOnly(s.text); let likes=getLikes(s.id); let comments=getComments(s.id); let isOpen=openComments.has(s.id); let img=photo?`<img src='${photo}' class='mt-2 w-full h-56 object-cover rounded-xl border-2 border-orange-100'/>`:'<div class="text- text-slate-400 mt-1 italic">Pas de photo</div>';
@@ -55,14 +51,12 @@ function render(){
   <div id="comments_${s.id}" class="${isOpen?'':'hidden'} mt-3 space-y-2 bg-white p-3 rounded-xl border"><div class="space-y-2">${comments.map(c=>`<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> ${c.text}<div class="text- text-slate-400">${c.date}</div></div>`).join('')||'<div class="text- text-slate-400">Pas de commentaires</div>'}</div><div class="flex gap-2"><input id="commentInput_${s.id}" placeholder="Écrire un commentaire..." class="flex-1 p-2 rounded-full bg-slate-50 border text-xs" onkeydown="if(event.key==='Enter') addComment(${s.id})"/><button onclick="addComment(${s.id})" class="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold">Envoyer</button></div></div></div>`; });
   document.getElementById('list').innerHTML=h||'Aucun signalement'; let ah=""; allData.forEach(s=>{ ah+=`<div class="py-2 flex justify-between text-sm"><span>${getTextOnly(s.text).substring(0,35)}</span><button onclick="del(${s.id})" class="text-xs bg-red-50 text-red-600 px-2 rounded-full">Supp</button></div>`; }); document.getElementById('adminList').innerHTML=ah;
 }
-async function send(){ let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris'); let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi...'; try{ let finalText=t+(currentBase64?` [PHOTO]${currentBase64}`:''); let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:finalText})}); let res=await r.json(); if(res.all){ allData=res.all; render(); updateMap(); } document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); document.getElementById('photoInfo').classList.add('hidden'); btn.innerText='Envoyer avec photo →'; }catch(e){ btn.innerText='Erreur'; } btn.disabled=false; }
+async function send(){ let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris'); let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi...'; try{ let finalText=t+(currentBase64?` [PHOTO]${currentBase64}`:''); let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:finalText})}); let res=await r.json(); if(res.all){ allData=res.all; render(); } document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); document.getElementById('photoInfo').classList.add('hidden'); btn.innerText='Envoyer avec photo →'; }catch(e){ btn.innerText='Erreur'; } btn.disabled=false; }
 function openAdmin(){ if(localStorage.getItem('admin')==='1') document.getElementById('adminModal').classList.remove('hidden'); else document.getElementById('loginModal').classList.remove('hidden'); }
 function doLogin(){ let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{ if(res.status==='ok'){ localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); } else alert('faux'); }); }
 function del(id){ if(!confirm('Supp?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load()); }
-// --- BOUTON INSTALL V18.5 CONSERVE - SEUL CHANGEMENT : TOUJOURS VISIBLE ---
 let deferredPrompt=null;
 const installBtn=document.getElementById('installBtn');
-// On force l'affichage même si beforeinstallprompt n'est pas encore arrivé
 installBtn.style.display='flex';
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; installBtn.style.display='flex'; });
 installBtn.addEventListener('click', async()=>{
@@ -71,6 +65,6 @@ installBtn.addEventListener('click', async()=>{
 });
 if(/iPhone|iPad|iPod/.test(navigator.userAgent)) document.getElementById('iosBanner').classList.remove('hidden');
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=21').catch(()=>{});
-function safeLoad(){ let ae=document.activeElement; if(ae && ae.id && ae.id.startsWith('commentInput_')) return; load(); } initMap(); load(); setInterval(safeLoad,12000);
+function safeLoad(){ let ae=document.activeElement; if(ae && ae.id && ae.id.startsWith('commentInput_')) return; load(); } load(); setInterval(safeLoad,12000);
 </script>
 </body></html>
