@@ -1,124 +1,79 @@
 <!DOCTYPE html>
-<html lang="fr">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RESEAU ESPOIR CITOYEN - COTE D'IVOIRE</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#f97316">
+<html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RESEAU ESPOIR CITOYEN - V18.8 Côte d'Ivoire</title>
+<link rel="manifest" href="manifest.json?v=23"/>
+<meta name="theme-color" content="#f97316"/>
+<link rel="icon" href="icon-192.png"/>
+<link rel="apple-touch-icon" href="icon-512.png"/>
 <script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<style>#map{height:380px;border-radius:16px}.scroll-fix{max-height:80vh;overflow-y:auto}</style>
-</head>
-<body class="bg-[#f8f6f2]">
-<header class="bg-white shadow-sm p-3 flex justify-between items-center sticky top-0 z-40">
-<div class="flex items-center gap-2"><div class="bg-gradient-to-br from-orange-500 to-green-600 text-white w-10 h-10 rounded-xl flex items-center justify-center font-black">RE</div><div><div class="font-black leading-none">RESEAU ESPOIR</div><div class="text- text-orange-500 font-bold">CITOYEN • CÔTE D'IVOIRE</div><div class="text-">V21 INSTALL SMART + LIKE + MAP</div></div></div>
-<div class="flex gap-2"><button id="installBtn" onclick="showInstallModal()" class="hidden bg-orange-500 hover:bg-orange-600 text-white px-4 py-1.5 rounded-full text-sm font-bold animate-pulse">📲 INSTALLER</button><button onclick="doLogin()" class="bg-black text-white px-3 py-1.5 rounded-full text-sm">🔐 Admin</button></div>
-</header>
+<style>#preview{max-height:200px;border-radius:12px;border:2px solid #f97316}</style></head>
+<body class="bg-[#f5f7f9]">
+<header class="sticky top-0 bg-white/95 backdrop-blur border-b z-[1000] shadow-sm"><div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+<div class="flex gap-3 items-center"><img src="icon-192.png" class="w-10 h-10 rounded-xl shadow-md"/><div class="leading-none"><div class="font-extrabold">RESEAU ESPOIR</div><div class="font-extrabold text-orange-500">CITOYEN • CÔTE D'IVOIRE</div><div class="text- tracking-widest text-slate-400 font-bold">V18.8 INSTALL MODAL + SANS CARTE</div></div></div>
+<div class="flex gap-2"><button id="installBtn" class="px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-green-600 text-white font-extrabold text-xs animate-pulse shadow-lg">📲 INSTALLER</button><button onclick="openAdmin()" class="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold">🔐 Admin</button></div></header>
 
-<div class="max-w- mx-auto p-3 grid lg:grid-cols-[380px_1fr] gap-4">
-<div class="space-y-3">
-<div class="bg-black text-white rounded-2xl p-3 flex justify-around text-center"><div><div class="text-xl font-bold" id="totalCounter">0</div><div class="text- opacity-70">TOTAL</div></div><div><div class="text-xl font-bold" id="photoCounter">0</div><div class="text- opacity-70">PHOTOS</div></div><div><div class="text-xl font-bold">16</div><div class="text- opacity-70">INTERACTIONS</div></div></div>
-<div class="bg-white rounded-2xl p-4 shadow-sm border">
-<h3 class="font-bold text-sm">📸 Signaler avec photo</h3>
-<textarea id="txt" placeholder="Ex: Eau usée Agbekoi, Cocody..." class="w-full border rounded-xl p-3 h-20 mt-2 text-sm"></textarea>
-<div class="mt-2 border-2 border-dashed rounded-xl p-2 text-center bg-orange-50/50">
-<input type="file" id="photoInput" accept="image/*" hidden onchange="previewPhoto(this)">
-<button onclick="document.getElementById('photoInput').click()" class="text-xs">📷 Ajouter photo (auto compression)</button>
-<img id="preview" class="hidden w-full mt-2 rounded-xl max-h-48 object-cover">
-</div>
-<button onclick="envoyer()" id="btnEnv" class="w-full bg-black text-white mt-3 py-2.5 rounded-full font-bold text-sm">Envoyer avec photo →</button>
-</div>
-<div id="map" class="border shadow-sm"></div>
-</div>
-<div><div class="flex justify-between items-center mb-2"><b class="text-sm">Fil d'actualité</b><button onclick="load()" class="text-xs border px-2 py-1 rounded-full">↻ Actualiser</button></div><div id="list" class="space-y-3"></div></div>
+<div id="iosBanner" class="hidden bg-orange-500 text-white text-center p-2 text-xs font-bold">📲 iPhone: Partager ⬆ > Sur l'écran d'accueil</div>
+
+<div class="max-w-6xl mx-auto px-4 mt-4 grid grid-cols-3 gap-2">
+<div class="bg-slate-900 rounded-xl p-3 text-white text-center"><div class="text- opacity-60">TOTAL</div><div id="statTotal" class="text-xl font-extrabold">0</div></div>
+<div class="bg-orange-500 rounded-xl p-3 text-white text-center"><div class="text-">CÔTE D'IVOIRE</div><div class="text-xs font-extrabold">🇨🇮 LIVE</div></div>
+<div class="bg-green-600 rounded-xl p-3 text-white text-center"><div class="text-">INTERACTIONS</div><div class="text-xs font-extrabold">❤ 💬 ↗</div></div>
 </div>
 
-<!-- ADMIN SCROLL FIX -->
-<div id="adminPanel" class="hidden fixed top-0 right-0 w- max-w- h-screen bg-white z-[9999] shadow-2xl flex flex-col"><div class="p-4 bg-black text-white flex justify-between"><b>Admin</b><button onclick="document.getElementById('adminPanel').classList.add('hidden')" class="bg-white text-black w-7 h-7 rounded-full">X</button></div><div id="adminList" class="flex-1 scroll-fix p-3 space-y-2"></div></div>
+<main class="max-w-6xl mx-auto p-4 grid md:grid-cols-[380px_1fr] gap-4">
+<div class="space-y-4">
+<div class="bg-white rounded-2xl p-4 border shadow-sm"><h3 class="font-bold text-sm">📸 Signaler avec photo</h3><textarea id="txt" class="w-full mt-2 h-20 p-3 bg-slate-50 border rounded-xl text-sm" placeholder="Ex: Eau usée Agbekoi, Cocody..."></textarea><label class="mt-2 flex flex-col items-center p-3 bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl cursor-pointer hover:bg-orange-100"><span class="text-xs font-bold text-orange-600">📷 Ajouter photo (auto 500px)</span><input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/></label><img id="preview" class="hidden mt-2 w-full object-cover shadow"/><div id="photoInfo" class="hidden text- font-bold text-green-600 mt-1"></div><button onclick="send()" id="sendBtn" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold text-sm">Envoyer avec photo →</button><div id="status" class="text- font-bold mt-2"></div></div>
+</div>
+<div class="bg-white rounded-2xl p-4 border shadow-sm"><div class="flex justify-between items-center"><h3 class="font-bold text-sm">Fil public 🇨🇮 (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100">↻ Actualiser</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto pr-1"></div></div>
+</main>
 
-<!-- MODAL INSTALL SMART - NE BLOQUE PLUS -->
-<div id="installModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[10000] flex items-center justify-center p-4">
-<div class="bg-white rounded- p-5 max-w- w-full shadow-2xl animate-[bounce_0.5s]">
-<div class="flex justify-between items-center mb-3"><h2 class="font-black flex gap-2">📲 Installer Réseau Espoir</h2><button onclick="closeInstall()" class="w-8 h-8 rounded-full bg-gray-100">X</button></div>
-<div class="grid grid-cols-2 gap-3">
-<div class="bg-orange-50 rounded-2xl p-3 border border-orange-100"><div class="text-xl">🤖</div><b class="text-sm">Android</b><div class="text- mt-1 leading-tight">1. Clique ⋮ en haut<br>2. <b>Installer l'app</b><br>3. Confirmer Installer</div><div class="mt-2 bg-black text-white text- px-3 py-1 rounded-full inline-block">Chrome recommandé</div></div>
-<div class="bg-green-50 rounded-2xl p-3 border border-green-100"><div class="text-xl">🍎</div><b class="text-sm">iPhone</b><div class="text- mt-1 leading-tight">1. Clique Partager <span class="bg-blue-500 text-white px-1">↑</span><br>2. <b>Sur l'écran d'accueil</b><br>3. Ajouter</div><div class="mt-2 bg-gray-800 text-white text- px-3 py-1 rounded-full inline-block">Safari obligatoire</div></div>
-</div>
-<div class="mt-4 bg-gradient-to-r from-orange-500 to-green-500 rounded-xl p-3 flex gap-3 items-center text-white"><div class="bg-white text-orange-500 w-10 h-10 rounded-xl flex items-center justify-center font-black">RE</div><div><div class="font-bold text-sm">RE CITOYEN • CÔTE D'IVOIRE</div><div class="text- opacity-90">App légère • Hors-ligne • <span id="modalCounter">16</span> signalements</div></div></div>
-<button onclick="closeInstall()" class="w-full mt-4 bg-black text-white py-3 rounded-full font-bold">J'ai compris</button>
-</div>
-</div>
+<div id="installModal" class="hidden fixed inset-0 bg-black/70 z-[4000] flex items-center justify-center p-4"><div class="bg-white p-6 rounded- w-full max-w-md shadow-2xl"><div class="flex justify-between items-center"><h3 class="font-extrabold text-lg">📲 Installer Réseau Espoir</h3><button onclick="document.getElementById('installModal').classList.add('hidden')" class="bg-slate-100 w-8 h-8 rounded-full font-bold">X</button></div><div class="mt-4 grid grid-cols-2 gap-3"><div class="bg-orange-50 border border-orange-200 rounded-2xl p-3"><div class="text-2xl">🤖</div><div class="font-bold text-sm mt-1">Android</div><div class="text-xs mt-2 leading-snug">1. Clique <b>⋮</b> en haut à droite<br/>2. <b>Installer l'application</b><br/>3. Confirmer <b>Installer</b></div><div class="mt-2 text- bg-slate-900 text-white px-2 py-1 rounded-full inline-block">Chrome recommandé</div></div><div class="bg-green-50 border border-green-200 rounded-2xl p-3"><div class="text-2xl">🍎</div><div class="font-bold text-sm mt-1">iPhone</div><div class="text-xs mt-2 leading-snug">1. Clique <b>Partager ⬆</b> en bas<br/>2. <b>Sur l'écran d'accueil</b><br/>3. <b>Ajouter</b> en haut</div><div class="mt-2 text- bg-slate-900 text-white px-2 py-1 rounded-full inline-block">Safari obligatoire</div></div></div><div class="mt-4 bg-slate-50 rounded-xl p-3 flex gap-3 items-center"><img src="icon-192.png" class="w-12 h-12 rounded-xl"/><div><div class="font-bold text-sm">RE CITOYEN • CÔTE D'IVOIRE</div><div class="text-xs text-slate-500">Appli légère • Fonctionne hors-ligne • 16 signalements live</div></div></div><button onclick="document.getElementById('installModal').classList.add('hidden')" class="w-full mt-4 p-3 bg-slate-900 text-white rounded-xl font-bold">J'ai compris</button></div></div>
+
+<div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-xs"><h3 class="font-bold">Admin</h3><input id="pass" type="password" placeholder="civ2024" class="w-full mt-3 p-3 border rounded-xl"/><button onclick="doLogin()" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold">Se connecter</button></div></div>
+<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-4 rounded-2xl w-full max-w-lg max-h- overflow-auto"><div class="flex justify-between"><b>Admin - <span id="adminCount">0</span></b><button onclick="document.getElementById('adminModal').classList.add('hidden')" class="bg-slate-100 px-3 py-1 rounded-full text-xs">X</button></div><div id="adminList" class="mt-2 divide-y"></div></div></div>
 
 <script>
-const API='https://reseau-espoir-backend.onrender.com';
-let allData=[]; let photoBase64=null; let deferredPrompt=null;
-const map = L.map('map').setView([5.35,-4.0],11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-let markers = L.layerGroup().addTo(map);
-
-// --- INSTALL SMART LOGIC ---
-window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; document.getElementById('installBtn').classList.remove('hidden'); });
-function showInstallModal(){
-  if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.then(()=>{ deferredPrompt=null; document.getElementById('installBtn').classList.add('hidden'); }); }
-  else { document.getElementById('installModal').classList.remove('hidden'); }
-}
-function closeInstall(){
-  document.getElementById('installModal').classList.add('hidden');
-  localStorage.setItem('install_seen','1');
-}
-window.addEventListener('load', ()=>{
-  const seen = localStorage.getItem('install_seen');
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-  if(!seen &&!isStandalone){
-    setTimeout(()=>{ document.getElementById('installModal').classList.remove('hidden'); }, 1500);
-    setTimeout(closeInstall, 15000);
-  }
-  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
-});
-
-// --- RESTE DE TON APP (LIKE, PHOTO, ETC) ---
-function previewPhoto(input){
-  if(input.files[0]){
-    const r=new FileReader();
-    r.onload=e=>{
-      const img=new Image(); img.onload=()=>{
-        const canvas=document.createElement('canvas');
-        const max=800; let w=img.width, h=img.height;
-        if(w>max||h>max){ const ratio=Math.min(max/w,max/h); w*=ratio; h*=ratio; }
-        canvas.width=w; canvas.height=h; canvas.getContext('2d').drawImage(img,0,0,w,h);
-        photoBase64=canvas.toDataURL('image/jpeg',0.7);
-        const p=document.getElementById('preview'); p.src=photoBase64; p.classList.remove('hidden');
-      }; img.src=e.target.result;
-    }; r.readAsDataURL(input.files[0]);
-  }
-}
-async function envoyer(){
-  const txt=document.getElementById('txt').value.trim(); if(!txt) return alert('Écris');
-  const b=document.getElementById('btnEnv'); b.innerText='Envoi...'; b.disabled=true;
-  try{ const r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:txt,photo:photoBase64})}); const j=await r.json(); allData=j.all||[]; render(); document.getElementById('txt').value=''; photoBase64=null; document.getElementById('preview').classList.add('hidden'); }catch(e){alert(e.message)} b.innerText='Envoyer avec photo →'; b.disabled=false;
-}
-async function load(){ const r=await fetch(API+'/?signalements'); allData=await r.json(); render(); }
+const API="https://reseau-espoir-backend.onrender.com"; let allData=[], currentBase64=null;
+function getPhotoUrl(text){ if(!text) return null; let m=text.match(/\[PHOTO\](data:image\/[^;]+;base64,[^\s]+)/); return m?m[1]:null; }
+function getTextOnly(text){ if(!text) return ''; return text.replace(/\[PHOTO\]data:image\/[^;]+;base64,[^\s]+/,'').trim(); }
+function getLikes(id){ return JSON.parse(localStorage.getItem('likes_'+id)||'{"count":0,"liked":false}'); }
+function toggleLike(id){ let d=getLikes(id); d.liked? (d.count--, d.liked=false) : (d.count++, d.liked=true); localStorage.setItem('likes_'+id, JSON.stringify(d)); render(); }
+let openComments=new Set();
+function getComments(id){ return JSON.parse(localStorage.getItem('comments_'+id)||'[]'); }
+function addComment(id){ let input=document.getElementById('commentInput_'+id); let txt=input.value.trim(); if(!txt) return; let c=getComments(id); c.push({text:txt,date:new Date().toLocaleDateString()}); localStorage.setItem('comments_'+id, JSON.stringify(c)); input.value=''; openComments.add(id); render(); }
+function toggleComments(id){ let el=document.getElementById('comments_'+id); if(!el) return; if(openComments.has(id)){ openComments.delete(id); el.classList.add('hidden'); } else { openComments.add(id); el.classList.remove('hidden'); } }
+function sharePost(id, txt){ let url=window.location.href; if(navigator.share){ navigator.share({title:'Réseau Espoir',text:txt,url}); } else { navigator.clipboard.writeText(txt+' '+url); alert('Lien copié!'); } }
+function previewPhoto(e){ const file=e.target.files[0]; if(!file) return; const reader=new FileReader(); reader.onload=ev=>{ const img=new Image(); img.onload=()=>{ const canvas=document.createElement('canvas'); let maxW=500,w=img.width,h=img.height; if(w>maxW){h=h*maxW/w;w=maxW;} canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(img,0,0,w,h); currentBase64=canvas.toDataURL('image/jpeg',0.5); document.getElementById('preview').src=currentBase64; document.getElementById('preview').classList.remove('hidden'); document.getElementById('photoInfo').classList.remove('hidden'); document.getElementById('photoInfo').innerText=`✅ ${(currentBase64.length/1024).toFixed(0)}KB prête`; }; img.src=ev.target.result; }; reader.readAsDataURL(file); }
+function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d; render(); } }); }
 function render(){
-  const list=document.getElementById('list'); list.innerHTML=''; markers.clearLayers();
-  document.getElementById('totalCounter').innerText=allData.length;
-  document.getElementById('photoCounter').innerText=allData.filter(x=>x.photo).length;
-  const mc=document.getElementById('modalCounter'); if(mc) mc.innerText=allData.length;
-  const adminL=document.getElementById('adminList'); if(adminL) adminL.innerHTML='';
-  allData.forEach((it,i)=>{
-    const likes=parseInt(localStorage.getItem('like_'+it.id)||'0');
-    const d=document.createElement('div'); d.className='bg-white rounded-2xl p-3 shadow-sm border';
-    d.innerHTML=`<div class="text-sm">${it.text}</div>${it.photo?`<img src="${it.photo}" class="w-full mt-2 rounded-xl max-h-80 object-cover">`:''}<div class="flex gap-2 mt-3 border-t pt-2"><button onclick="like(${it.id})" class="flex gap-1 text-xs border px-3 py-1 rounded-full">❤️ <span id="l-${it.id}">${likes}</span> J'aime</button><button class="text-xs border px-3 py-1 rounded-full">💬 Commenter (${Math.floor(Math.random()*3)})</button><button onclick="navigator.clipboard.writeText('${it.text.replace(/'/g,"")}');alert('Copié')" class="text-xs border px-3 py-1 rounded-full ml-auto">↗️ Partager</button></div><div class="text- text-gray-400 mt-1">${it.date||''}</div>`;
-    list.appendChild(d);
-    const lat=5.32+Math.random()*0.15, lng=-4.08+Math.random()*0.2;
-    L.marker([lat,lng]).addTo(markers).bindPopup(it.text.substring(0,50));
-    if(adminL){ const a=document.createElement('div'); a.className='border rounded-xl p-2 flex justify-between'; a.innerHTML=`<span class="text-xs truncate">${it.text}</span><button onclick="del(${it.id})" class="bg-red-500 text-white px-2 rounded-full text-xs">Suppr</button>`; adminL.appendChild(a); }
-  });
+  document.getElementById('count').innerText=allData.length; document.getElementById('statTotal').innerText=allData.length; document.getElementById('adminCount').innerText=allData.length;
+  let h=""; allData.forEach((s,i)=>{ let photo=getPhotoUrl(s.text); let txt=getTextOnly(s.text); let likes=getLikes(s.id); let comments=getComments(s.id); let isOpen=openComments.has(s.id); let img=photo?`<img src='${photo}' class='mt-2 w-full h-56 object-cover rounded-xl border-2 border-orange-100'/>`:'<div class="text- text-slate-400 mt-1 italic">Pas de photo</div>';
+  h+=`<div class="p-4 rounded-2xl bg-slate-50 border"><div class="flex justify-between text-"><span class="font-bold text-orange-600">#${i+1} 📸 • Côte d'Ivoire</span><span class="text-slate-400">${s.date||''}</span></div><div class="mt-1 font-semibold text-sm">${txt}</div>${img}
+  <div class="mt-3 flex gap-3 text- font-bold border-t pt-2"><button onclick="toggleLike(${s.id})" class="${likes.liked?'text-orange-600':'text-slate-500'} flex gap-1 hover:bg-white px-3 py-1.5 rounded-full transition">❤ J'aime ${likes.count>0?`(${likes.count})`:''}</button><button onclick="toggleComments(${s.id})" class="text-slate-500 flex gap-1 hover:bg-white px-3 py-1.5 rounded-full">💬 Commenter ${comments.length>0?`(${comments.length})`:''}</button><button onclick="sharePost(${s.id},'${txt.replace(/'/g,"").substring(0,60)}')" class="text-slate-500 flex gap-1 hover:bg-white px-3 py-1.5 rounded-full">↗ Partager</button></div>
+  <div id="comments_${s.id}" class="${isOpen?'':'hidden'} mt-3 space-y-2 bg-white p-3 rounded-xl border"><div class="space-y-2">${comments.map(c=>`<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> ${c.text}<div class="text- text-slate-400">${c.date}</div></div>`).join('')||'<div class="text- text-slate-400">Pas de commentaires</div>'}</div><div class="flex gap-2"><input id="commentInput_${s.id}" placeholder="Écrire un commentaire..." class="flex-1 p-2 rounded-full bg-slate-50 border text-xs" onkeydown="if(event.key==='Enter') addComment(${s.id})"/><button onclick="addComment(${s.id})" class="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold">Envoyer</button></div></div></div>`; });
+  document.getElementById('list').innerHTML=h||'Aucun signalement'; let ah=""; allData.forEach(s=>{ ah+=`<div class="py-2 flex justify-between text-sm"><span>${getTextOnly(s.text).substring(0,35)}</span><button onclick="del(${s.id})" class="text-xs bg-red-50 text-red-600 px-2 rounded-full">Supp</button></div>`; }); document.getElementById('adminList').innerHTML=ah;
 }
-function like(id){ if(localStorage.getItem('liked_'+id)) return; let n=parseInt(localStorage.getItem('like_'+id)||'0')+1; localStorage.setItem('like_'+id,n); localStorage.setItem('liked_'+id,'1'); document.getElementById('l-'+id).innerText=n; }
-async function doLogin(){ if(localStorage.getItem('admin')==='1'){ document.getElementById('adminPanel').classList.remove('hidden'); return; } const p=prompt('Mdp:'); if(!p) return; const r=await fetch(API+'/?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}); const j=await r.json(); if(j.status==='ok'){ localStorage.setItem('admin','1'); localStorage.setItem('admin_token',j.token); document.getElementById('adminPanel').classList.remove('hidden'); } else alert('Mauvais'); }
-async function del(id){ if(!confirm('Supprimer?')) return; const t=localStorage.getItem('admin_token')||'Galilee2026!'; const r=await fetch(API+'/?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,password:t,token:t})}); const j=await r.json(); if(!j.error){ allData=j.all; render(); } }
-load();
+async function send(){ let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris'); let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi...'; try{ let finalText=t+(currentBase64?` [PHOTO]${currentBase64}`:''); let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:finalText})}); let res=await r.json(); if(res.all){ allData=res.all; render(); } document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); document.getElementById('photoInfo').classList.add('hidden'); btn.innerText='Envoyer avec photo →'; }catch(e){ btn.innerText='Erreur'; } btn.disabled=false; }
+function openAdmin(){ if(localStorage.getItem('admin')==='1') document.getElementById('adminModal').classList.remove('hidden'); else document.getElementById('loginModal').classList.remove('hidden'); }
+function doLogin(){ let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{ if(res.status==='ok'){ localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); } else alert('faux'); }); }
+function del(id){ if(!confirm('Supp?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}).then(()=>load()); }
+// --- V18.8 INSTALL FIXE - APPROCHE MODALE ---
+let deferredPrompt=null;
+const installBtn=document.getElementById('installBtn');
+installBtn.style.display='flex';
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; installBtn.innerHTML='📲 INSTALLER'; installBtn.classList.remove('animate-pulse'); installBtn.classList.add('ring-4','ring-green-300'); });
+
+function openInstallModal(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(({outcome})=>{ if(outcome==='accepted') installBtn.innerText='✅ Installée!'; deferredPrompt=null; document.getElementById('installModal').classList.add('hidden'); });
+  } else {
+    document.getElementById('installModal').classList.remove('hidden');
+  }
+}
+installBtn.addEventListener('click', openInstallModal);
+if(/iPhone|iPad|iPod/.test(navigator.userAgent)) document.getElementById('iosBanner').classList.remove('hidden');
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=23').catch(()=>{});
+function safeLoad(){ let ae=document.activeElement; if(ae && ae.id && ae.id.startsWith('commentInput_')) return; load(); } load(); setInterval(safeLoad,12000);
 </script>
-</body>
-</html>
+</body></html>
