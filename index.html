@@ -1,149 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RESEAU ESPOIR V19.3 FIX</title>
+<link rel="manifest" href="manifest.json?v=27"/>
+<meta name="theme-color" content="#f97316"/>
+<link rel="icon" href="icon-192.png"/>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f5f7f9]">
+<header class="sticky top-0 bg-white/95 border-b z-[1000] shadow-sm"><div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
+<div class="flex gap-3 items-center"><img src="icon-192.png" class="w-10 h-10 rounded-xl"/><div class="leading-none"><div class="font-extrabold">RESEAU ESPOIR</div><div class="font-extrabold text-orange-500">CITOYEN • CÔTE D'IVOIRE</div><div class="text- text-slate-400 font-bold">V19.3 FIX REMONTE</div></div></div>
+<div class="flex gap-2"><button id="installBtn" class="px-4 py-2 rounded-full bg-orange-500 text-white font-bold text-xs">📲 INSTALLER</button><button onclick="openAdmin()" class="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold">🔐 Admin</button></div></div></header>
+<div class="max-w-6xl mx-auto px-4 mt-4 grid grid-cols-3 gap-2">
+<div class="bg-slate-900 rounded-xl p-3 text-white text-center"><div class="text- opacity-60">TOTAL</div><div id="statTotal" class="text-xl font-extrabold">0</div></div>
+<div class="bg-orange-500 rounded-xl p-3 text-white text-center"><div class="text-">CÔTE D'IVOIRE</div><div class="text-xs font-bold">🇨🇮 LIVE</div></div>
+<div class="bg-green-600 rounded-xl p-3 text-white text-center"><div class="text-">J'AIME TOTAL</div><div id="statLikes" class="text-xl font-extrabold">0</div></div>
+</div>
+<main class="max-w-6xl mx-auto p-4 grid md:grid-cols-[380px_1fr] gap-4">
+<div class="bg-white rounded-2xl p-4 border shadow-sm h-fit"><h3 class="font-bold text-sm">📸 Signaler avec photo</h3><textarea id="txt" class="w-full mt-2 h-20 p-3 bg-slate-50 border rounded-xl text-sm" placeholder="Ex: Eau usée Agbekoi..."></textarea><label class="mt-2 flex flex-col items-center p-3 bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl cursor-pointer"><span class="text-xs font-bold text-orange-600">📷 Ajouter photo (auto 500px)</span><input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/></label><img id="preview" class="hidden mt-2 w-full h-56 object-cover rounded-xl border"/><button onclick="send()" id="sendBtn" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold text-sm">Envoyer →</button></div>
+<div class="bg-white rounded-2xl p-4 border shadow-sm"><div class="flex justify-between items-center"><h3 class="font-bold text-sm">Fil public 🇨🇮 (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100">↻ Actualiser</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto pr-1"></div></div>
+</main>
+<div id="installModal" class="hidden fixed inset-0 bg-black/70 z-[4000] flex items-center justify-center p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-md"><div class="flex justify-between"><h3 class="font-extrabold">📲 Installer</h3><button onclick="closeInstallModal()" class="bg-slate-100 w-8 h-8 rounded-full">X</button></div><div class="mt-4 text-xs">Android: ⋮ > Installer l'app<br>iPhone: Partager ⬆ > Sur l'écran d'accueil</div><button onclick="closeInstallModal()" class="w-full mt-4 p-3 bg-slate-900 text-white rounded-xl font-bold">J'ai compris</button></div></div>
+<div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-xs"><h3 class="font-bold">Admin</h3><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-3 p-3 border rounded-xl"/><button onclick="doLogin()" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold">Se connecter</button></div></div>
+<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-4 rounded-2xl w-full max-w-lg max-h- overflow-auto"><div class="flex justify-between"><b>Admin - <span id="adminCount">0</span></b><button onclick="document.getElementById('adminModal').classList.add('hidden')" class="bg-slate-100 px-3 py-1 rounded-full text-xs">X</button></div><div id="adminList" class="mt-2 divide-y"></div></div></div>
+
+<script>
 const API="https://reseau-espoir-backend.onrender.com";
 let allData=[], currentBase64=null, openComments=new Set();
-
-function getPhotoUrl(s){
-  if(s.photo) return s.photo;
-  if(!s.text) return null;
-  let m=s.text.match(/\[PHOTO\](data:image\/[^;]+;base64,[^\s]+)/);
-  return m?m[1]:null;
-}
+function getPhotoUrl(s){ if(s.photo) return s.photo; if(!s.text) return null; let m=s.text.match(/\[PHOTO\](data:image\/[^;]+;base64,[^\s]+)/); return m?m[1]:null; }
 function getTextOnly(t){ return (t||'').replace(/\[PHOTO\]data:image\/[^;]+;base64,[^\s]+/,'').trim(); }
-
-function previewPhoto(e){
-  const file=e.target.files[0]; if(!file) return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const c=document.createElement('canvas');
-      let maxW=500,w=img.width,h=img.height;
-      if(w>maxW){h=h*maxW/w;w=maxW;}
-      c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
-      currentBase64=c.toDataURL('image/jpeg',0.5);
-      document.getElementById('preview').src=currentBase64;
-      document.getElementById('preview').classList.remove('hidden');
-    };
-    img.src=ev.target.result;
-  };
-  r.readAsDataURL(file);
-}
-
-function load(){
-  fetch(API+"?signalements").then(r=>r.json()).then(d=>{
-    if(Array.isArray(d)){
-      allData=d.sort((a,b)=> b.id - a.id);
-      renderFull();
-    }
-  });
-}
-
+function previewPhoto(e){ const file=e.target.files[0]; if(!file) return; const r=new FileReader(); r.onload=ev=>{ const img=new Image(); img.onload=()=>{ const c=document.createElement('canvas'); let maxW=500,w=img.width,h=img.height; if(w>maxW){h=h*maxW/w;w=maxW;} c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h); currentBase64=c.toDataURL('image/jpeg',0.5); let p=document.getElementById('preview'); p.src=currentBase64; p.classList.remove('hidden'); }; img.src=ev.target.result; }; r.readAsDataURL(file); }
+function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d.sort((a,b)=>b.id-a.id); renderFull(); } }); }
 function renderFull(){
   document.getElementById('count').innerText=allData.length;
   document.getElementById('statTotal').innerText=allData.length;
-  document.getElementById('statLikes').innerText=allData.reduce((a,b)=> a + (b.likes||0), 0);
+  document.getElementById('statLikes').innerText=allData.reduce((a,b)=>a+(b.likes||0),0);
   document.getElementById('adminCount').innerText=allData.length;
-
-  let h="";
-  allData.forEach((s)=>{
-    let photo=getPhotoUrl(s);
-    let txt=getTextOnly(s.text);
-    let likes=s.likes||0;
-    let comments=s.comments||[];
-    let isOpen=openComments.has(s.id);
+  let h=""; allData.forEach(s=>{
+    let photo=getPhotoUrl(s); let txt=getTextOnly(s.text); let likes=s.likes||0; let comments=s.comments||[]; let isOpen=openComments.has(s.id);
     let img=photo?`<img src='${photo}' class='mt-2 w-full h-56 object-cover rounded-xl border'/>`:'<div class="text- text-slate-400 mt-1 italic">Pas de photo</div>';
-    h+=`<div id="post_${s.id}" class="p-4 rounded-2xl bg-slate-50 border">
-      <div class="flex justify-between text-"><span class="font-bold text-orange-600">#${s.id} 📸 • Côte d'Ivoire</span><span class="text-slate-400">${s.date||''}</span></div>
-      <div class="mt-1 font-semibold text-sm">${txt}</div>${img}
-      <div class="mt-3 flex gap-2 text- font-bold border-t pt-2">
-        <button onclick="toggleLike(${s.id})" class="flex gap-1 hover:bg-white px-3 py-1.5 rounded-full ${likes>0?'text-orange-600':''}">❤ J'aime ${likes>0?`(${likes})`:''}</button>
-        <button onclick="toggleComments(${s.id})" class="flex gap-1 hover:bg-white px-3 py-1.5 rounded-full">💬 Commenter ${comments.length>0?`(${comments.length})`:''}</button>
-        <button onclick="sharePost('${txt.replace(/'/g,"").substring(0,50)}')" class="px-3 py-1.5 rounded-full">↗ Partager</button>
-      </div>
-      <div id="comments_${s.id}" class="${isOpen?'':'hidden'} mt-3 space-y-2 bg-white p-3 rounded-xl border">
-        <div id="comments_list_${s.id}" class="space-y-2">${comments.map(c=>`<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> ${c.text}<div class="text- text-slate-400">${c.date}</div></div>`).join('')||'<div class="text- text-slate-400">Pas de commentaires</div>'}</div>
-        <div class="flex gap-2 mt-2"><input id="commentInput_${s.id}" placeholder="Écrire..." class="flex-1 p-2 rounded-full bg-slate-50 border text-xs" onkeydown="if(event.key==='Enter') addComment(${s.id})"/><button onclick="addComment(${s.id})" class="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold">Envoyer</button></div>
-      </div>
-    </div>`;
+    h+=`<div id="post_${s.id}" class="p-4 rounded-2xl bg-slate-50 border"><div class="flex justify-between text-"><span class="font-bold text-orange-600">#${s.id} 📸 • Côte d'Ivoire</span><span class="text-slate-400">${s.date||''}</span></div><div class="mt-1 font-semibold text-sm">${txt}</div>${img}<div class="mt-3 flex gap-2 text- font-bold border-t pt-2"><button onclick="toggleLike(${s.id})" class="px-3 py-1.5 rounded-full ${likes>0?'text-orange-600':''}">❤ J'aime ${likes>0?'('+likes+')':''}</button><button onclick="toggleComments(${s.id})" class="px-3 py-1.5 rounded-full">💬 Commenter ${comments.length>0?'('+comments.length+')':''}</button><button onclick="sharePost('${txt.replace(/'/g,'').substring(0,40)}')" class="px-3 py-1.5 rounded-full">↗ Partager</button></div><div id="comments_${s.id}" class="${isOpen?'':'hidden'} mt-3 bg-white p-3 rounded-xl border"><div id="comments_list_${s.id}" class="space-y-2">${comments.map(c=>`<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> ${c.text}<div class="text- text-slate-400">${c.date}</div></div>`).join('')||'<div class="text- text-slate-400">Pas de commentaires</div>'}</div><div class="flex gap-2 mt-2"><input id="commentInput_${s.id}" placeholder="Écrire..." class="flex-1 p-2 rounded-full bg-slate-50 border text-xs" onkeydown="if(event.key==='Enter') addComment(${s.id})"/><button onclick="addComment(${s.id})" class="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold">Envoyer</button></div></div></div>`;
   });
   document.getElementById('list').innerHTML=h||'Aucun signalement';
   let ah=""; allData.forEach(s=>{ ah+=`<div class="py-2 flex justify-between text-sm"><span>${getTextOnly(s.text).substring(0,35)}</span><button onclick="del(${s.id})" class="text-xs bg-red-50 text-red-600 px-2 rounded-full">Supp</button></div>`; });
   document.getElementById('adminList').innerHTML=ah;
 }
-
-// --- FIX ANTI-REMONTEE : on ne touche qu'à un seul post ---
-
-async function toggleLike(id){
-  let s=allData.find(x=>x.id==id); if(!s) return;
-  s.likes=(s.likes||0)+1;
-  // Update seulement le bouton, pas tout le fil
-  const postEl = document.getElementById(`post_${id}`);
-  if(postEl) postEl.querySelectorAll('button')[0].innerHTML = `❤ J'aime (${s.likes})`;
-  document.getElementById('statLikes').innerText = allData.reduce((a,b)=> a + (b.likes||0), 0);
-  try{
-    let r=await fetch(API+"?like",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
-    let res=await r.json();
-    if(res.all){ allData=res.all.sort((a,b)=> b.id - a.id); }
-  }catch(e){}
-}
-
-function toggleComments(id){
-  if(openComments.has(id)) openComments.delete(id); else openComments.add(id);
-  const el=document.getElementById(`comments_${id}`);
-  if(el) el.classList.toggle('hidden');
-}
-
-async function addComment(id){
-  let input=document.getElementById(`commentInput_${id}`);
-  if(!input) return;
-  let txt=input.value.trim(); if(!txt) return;
-  openComments.add(id);
-  let s=allData.find(x=>x.id==id);
-  // Affichage instantané sans re-render global
-  const listDiv = document.getElementById(`comments_list_${id}`);
-  if(listDiv){
-    listDiv.innerHTML += `<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> ${txt}<div class="text- text-slate-400">maintenant</div></div>`;
-  }
-  input.value='';
-  try{
-    let r=await fetch(API+"?comment",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id, text: txt})});
-    let res=await r.json();
-    if(res.all){
-      // On met à jour les données en mémoire mais on NE re-render pas tout
-      allData=res.all.sort((a,b)=> b.id - a.id);
-      let updated = allData.find(x=>x.id==id);
-      if(updated && document.getElementById(`comments_list_${id}`)){
-        document.getElementById(`comments_list_${id}`).innerHTML = updated.comments.map(c=>`<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> ${c.text}<div class="text- text-slate-400">${c.date}</div></div>`).join('');
-      }
-    }
-  }catch(e){}
-}
-
-function sharePost(txt){ if(navigator.share){ navigator.share({title:'Réseau Espoir',text:txt,url:location.href}); } else { navigator.clipboard.writeText(txt+' '+location.href); alert('Lien copié!'); } }
-
-async function send(){
-  let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris');
-  let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi...';
-  try{
-    let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t, photo: currentBase64})});
-    let res=await r.json();
-    if(res.all){ allData=res.all.sort((a,b)=> b.id - a.id); renderFull(); }
-    document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); btn.innerText='Envoyer →';
-  }catch(e){ btn.innerText='Erreur'; } btn.disabled=false;
-}
+async function toggleLike(id){ let s=allData.find(x=>x.id==id); if(!s) return; s.likes=(s.likes||0)+1; let post=document.getElementById('post_'+id); if(post) post.querySelector('button').innerHTML='❤ J\'aime ('+s.likes+')'; document.getElementById('statLikes').innerText=allData.reduce((a,b)=>a+(b.likes||0),0); try{ let r=await fetch(API+"?like",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})}); let res=await r.json(); if(res.all) allData=res.all.sort((a,b)=>b.id-a.id); }catch(e){} }
+function toggleComments(id){ if(openComments.has(id)) openComments.delete(id); else openComments.add(id); let el=document.getElementById('comments_'+id); if(el) el.classList.toggle('hidden'); }
+async function addComment(id){ let input=document.getElementById('commentInput_'+id); if(!input) return; let txt=input.value.trim(); if(!txt) return; openComments.add(id); let list=document.getElementById('comments_list_'+id); if(list) list.innerHTML+='<div class="bg-slate-50 p-2 rounded-xl text-xs"><b>Anonyme:</b> '+txt+'<div class="text- text-slate-400">maintenant</div></div>'; input.value=''; try{ let r=await fetch(API+"?comment",{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,text:txt})}); let res=await r.json(); if(res.all) allData=res.all.sort((a,b)=>b.id-a.id); }catch(e){} }
+function sharePost(txt){ if(navigator.share) navigator.share({title:'Réseau Espoir',text:txt,url:location.href}); else { navigator.clipboard.writeText(txt+' '+location.href); alert('Lien copié!'); } }
+async function send(){ let t=document.getElementById('txt').value.trim(); if(!t) return alert('Écris'); let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi...'; try{ let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,photo:currentBase64})}); let res=await r.json(); if(res.all){ allData=res.all.sort((a,b)=>b.id-a.id); renderFull(); } document.getElementById('txt').value=''; currentBase64=null; document.getElementById('preview').classList.add('hidden'); btn.innerText='Envoyer →'; }catch(e){ btn.innerText='Erreur'; } btn.disabled=false; }
 function openAdmin(){ if(localStorage.getItem('admin')==='1') document.getElementById('adminModal').classList.remove('hidden'); else document.getElementById('loginModal').classList.remove('hidden'); }
 function doLogin(){ let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{ if(res.status==='ok'){ localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); } else alert('faux'); }); }
-function del(id){ if(!confirm('Supp?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id, password:'Galilee2026!'})}).then(r=>r.json()).then(res=>{ if(res.all) { allData=res.all.sort((a,b)=> b.id - a.id); renderFull(); } else load(); }); }
-
-// INSTALL
-let deferredPrompt=null; const installBtn=document.getElementById('installBtn'); const installModal=document.getElementById('installModal');
-function closeInstallModal(){ installModal.classList.add('hidden'); }
-window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; });
-window.addEventListener('appinstalled', ()=>{ installBtn.style.display='none'; deferredPrompt=null; closeInstallModal(); });
-async function openInstallModal(){ if(deferredPrompt){ deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted') installBtn.style.display='none'; deferredPrompt=null; closeInstallModal(); } else { installModal.classList.remove('hidden'); } }
-installBtn.addEventListener('click', openInstallModal);
+function del(id){ if(!confirm('Supp?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,password:'Galilee2026!'})}).then(r=>r.json()).then(res=>{ if(res.all){ allData=res.all.sort((a,b)=>b.id-a.id); renderFull(); } else load(); }); }
+let deferredPrompt=null; const installBtn=document.getElementById('installBtn'); const installModal=document.getElementById('installModal'); function closeInstallModal(){ installModal.classList.add('hidden'); }
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; });
+window.addEventListener('appinstalled',()=>{ installBtn.style.display='none'; deferredPrompt=null; closeInstallModal(); });
+async function openInstallModal(){ if(deferredPrompt){ deferredPrompt.prompt(); let o=await deferredPrompt.userChoice; if(o.outcome==='accepted') installBtn.style.display='none'; deferredPrompt=null; closeInstallModal(); } else installModal.classList.remove('hidden'); }
+installBtn.addEventListener('click',openInstallModal);
 if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=27');
-
-// IMPORTANT : on arrête l'auto-refresh qui faisait remonter
 load();
-// setInterval désactivé pour ne plus faire remonter
-// setInterval(()=>{ let ae=document.activeElement; if(ae&&ae.id&&ae.id.startsWith('commentInput_')) return; load(); },15000);
+</script>
+</body></html>
