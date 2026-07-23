@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="fr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RESEAU ESPOIR V20 PHOTO FIX</title>
-<link rel="manifest" href="manifest.json?v=30"/>
+<title>RESEAU ESPOIR V31 FIX ENVOI</title>
+<link rel="manifest" href="manifest.json?v=31"/>
 <meta name="theme-color" content="#f97316"/>
 <link rel="icon" href="icon-192.png"/>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-[#f5f7f9]">
 <header class="sticky top-0 bg-white/95 border-b z-[1000] shadow-sm"><div class="max-w-6xl mx-auto px-4 h-16 flex justify-between items-center">
-<div class="flex gap-3 items-center"><img src="icon-192.png" class="w-10 h-10 rounded-xl"/><div class="leading-none"><div class="font-extrabold">RESEAU ESPOIR</div><div class="font-extrabold text-orange-500">CITOYEN • CÔTE D'IVOIRE</div><div class="text- text-slate-400 font-bold">V20 PHOTO FIX</div></div></div>
+<div class="flex gap-3 items-center"><img src="icon-192.png" class="w-10 h-10 rounded-xl"/><div class="leading-none"><div class="font-extrabold">RESEAU ESPOIR</div><div class="font-extrabold text-orange-500">CITOYEN • CÔTE D'IVOIRE</div><div class="text- text-slate-400 font-bold">V31 FIX ENVOI</div></div></div>
 <div class="flex gap-2"><button id="installBtn" class="px-4 py-2 rounded-full bg-orange-500 text-white font-bold text-xs">📲 INSTALLER</button><button onclick="openAdmin()" class="bg-slate-900 text-white px-3 py-2 rounded-full text-xs font-bold">🔐 Admin</button></div></div></header>
 <div class="max-w-6xl mx-auto px-4 mt-4 grid grid-cols-2 gap-2">
 <div class="bg-slate-900 rounded-xl p-3 text-white text-center"><div class="text- opacity-60">TOTAL</div><div id="statTotal" class="text-xl font-extrabold">0</div></div>
@@ -19,8 +19,8 @@
 <h3 class="font-bold text-sm">📸 Signaler avec photo</h3>
 <textarea id="txt" class="w-full mt-2 h-20 p-3 bg-slate-50 border rounded-xl text-sm" placeholder="Ex: Eau usée Agbekoi..."></textarea>
 <label class="mt-2 flex flex-col items-center p-3 bg-orange-50 border-2 border-dashed border-orange-200 rounded-xl cursor-pointer">
-<span class="text-xs font-bold text-orange-600">📷 Ajouter photo (obligatoire)</span>
-<span id="photoStatus" class="text- text-slate-500"></span>
+<span class="text-xs font-bold text-orange-600">📷 Ajouter photo (auto 600px)</span>
+<span id="photoStatus" class="text- text-green-600 font-bold"></span>
 <input type="file" id="photoInput" accept="image/*" class="hidden" onchange="previewPhoto(event)"/>
 </label>
 <img id="preview" class="hidden mt-2 w-full h-56 object-cover rounded-xl border-2 border-green-500"/>
@@ -28,14 +28,12 @@
 </div>
 <div class="bg-white rounded-2xl p-4 border shadow-sm"><div class="flex justify-between items-center"><h3 class="font-bold text-sm">Fil public 🇨🇮 (<span id="count">0</span>)</h3><button onclick="load()" class="text-xs font-bold px-3 py-1 rounded-full bg-slate-100">↻ Actualiser</button></div><div id="list" class="mt-4 space-y-4 max-h- overflow-auto pr-1"></div></div>
 </main>
-<div id="loginModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-xs"><h3 class="font-bold">Admin</h3><input id="pass" type="password" placeholder="Mot de passe" class="w-full mt-3 p-3 border rounded-xl"/><button onclick="doLogin()" class="w-full mt-3 p-3 bg-slate-900 text-white rounded-xl font-bold">Se connecter</button></div></div>
-<div id="adminModal" class="hidden fixed inset-0 bg-black/60 z-[3000] flex items-center justify-center p-4"><div class="bg-white p-4 rounded-2xl w-full max-w-lg max-h- overflow-auto"><div class="flex justify-between"><b>Admin - <span id="adminCount">0</span></b><button onclick="document.getElementById('adminModal').classList.add('hidden')" class="bg-slate-100 px-3 py-1 rounded-full text-xs">X</button></div><div id="adminList" class="mt-2 divide-y"></div></div></div>
 <script>
 const API="https://reseau-espoir-backend.onrender.com"; let allData=[], currentBase64=null;
 function getPhotoUrl(s){ return s.photo || null; }
 function getTextOnly(t){ return (t||'').replace(/\[PHOTO\]data:image\/[^;]+;base64,[^\s]+/,'').trim(); }
 function previewPhoto(e){
-  const file=e.target.files[0]; if(!file) return;
+  const file=e.target.files[0]; if(!file){ currentBase64=null; return; }
   const r=new FileReader();
   r.onload=ev=>{
     const img=new Image();
@@ -44,47 +42,47 @@ function previewPhoto(e){
       if(w>maxW){h=h*maxW/w;w=maxW;} c.width=w;c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
       currentBase64=c.toDataURL('image/jpeg',0.6);
-      document.getElementById('preview').src=currentBase64;
-      document.getElementById('preview').classList.remove('hidden');
-      document.getElementById('photoStatus').innerText='✅ Photo prête ('+Math.round(currentBase64.length/1024)+'KB)';
+      const p=document.getElementById('preview');
+      p.src=currentBase64; p.classList.remove('hidden');
+      document.getElementById('photoStatus').innerText='✅ Photo prête - clique Envoyer';
     };
     img.src=ev.target.result;
   };
   r.readAsDataURL(file);
 }
-function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d.sort((a,b)=>b.id-a.id); render(); } }); }
+function load(){ fetch(API+"?signalements").then(r=>r.json()).then(d=>{ if(Array.isArray(d)){ allData=d.sort((a,b)=>b.id-a.id); render(); } }).catch(()=>{}); }
 function render(){
   document.getElementById('count').innerText=allData.length;
   document.getElementById('statTotal').innerText=allData.length;
-  document.getElementById('adminCount').innerText=allData.length;
   let h=""; allData.forEach(s=>{
     let photo=getPhotoUrl(s); let txt=getTextOnly(s.text);
-    let img=photo?`<img src='${photo}' class='mt-2 w-full h-64 object-cover rounded-xl border-2 border-green-400'/>`:'<div class="text- text-slate-400 mt-1 italic">Pas de photo</div>';
+    let img=photo?`<img src='${photo}' class='mt-2 w-full h-64 object-cover rounded-xl border'/>`:'<div class="text- text-slate-400 mt-1 italic">Pas de photo</div>';
     h+=`<div class="p-4 rounded-2xl bg-slate-50 border"><div class="flex justify-between text-"><span class="font-bold text-orange-600">#${s.id} 📸 • Côte d'Ivoire</span><span class="text-slate-400">${s.date||''}</span></div><div class="mt-1 font-semibold text-sm">${txt}</div>${img}</div>`;
   });
-  document.getElementById('list').innerHTML=h||'Aucun signalement';
-  let ah=""; allData.forEach(s=>{ ah+=`<div class="py-2 flex justify-between text-sm"><span>${getTextOnly(s.text).substring(0,35)}</span><button onclick="del(${s.id})" class="text-xs bg-red-50 text-red-600 px-2 rounded-full">Supp</button></div>`; });
-  document.getElementById('adminList').innerHTML=ah;
+  document.getElementById('list').innerHTML=h||'Aucun';
 }
 async function send(){
   let t=document.getElementById('txt').value.trim();
-  if(!t) return alert('Écris un texte');
-  if(!currentBase64){ alert('⚠️ Clique sur Ajouter photo avant Envoyer'); return; }
-  let btn=document.getElementById('sendBtn'); btn.disabled=true; btn.innerText='⏳ Envoi photo...';
+  if(!t){ alert('Écris un texte'); return; }
+  let btn=document.getElementById('sendBtn');
+  btn.disabled=true; btn.innerText='⏳ Envoi...';
   try{
-    let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:t,photo:currentBase64})});
+    let payload={text:t};
+    if(currentBase64) payload.photo=currentBase64;
+    console.log('ENVOI', t, payload.photo?payload.photo.length:'sans photo');
+    let r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     let res=await r.json();
+    console.log('REPONSE', res);
     if(res.all){ allData=res.all.sort((a,b)=>b.id-a.id); render(); }
     document.getElementById('txt').value=''; currentBase64=null;
     document.getElementById('preview').classList.add('hidden');
     document.getElementById('photoStatus').innerText='';
-  }catch(e){ alert('Erreur'); }
+    document.getElementById('photoInput').value='';
+  }catch(e){ console.error(e); alert('Erreur envoi: '+e.message); }
   btn.disabled=false; btn.innerText='Envoyer →';
 }
-function openAdmin(){ if(localStorage.getItem('admin')==='1') document.getElementById('adminModal').classList.remove('hidden'); else document.getElementById('loginModal').classList.remove('hidden'); }
-function doLogin(){ let p=document.getElementById('pass').value; fetch(API+'?login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:p})}).then(r=>r.json()).then(res=>{ if(res.status==='ok'){ localStorage.setItem('admin','1'); document.getElementById('loginModal').classList.add('hidden'); document.getElementById('adminModal').classList.remove('hidden'); } else alert('faux'); }); }
-function del(id){ if(!confirm('Supp?')) return; fetch(API+'?delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,password:'Galilee2026!'})}).then(r=>r.json()).then(res=>{ if(res.all){ allData=res.all.sort((a,b)=>b.id-a.id); render(); } else load(); }); }
-let deferredPrompt=null; const installBtn=document.getElementById('installBtn'); window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); deferredPrompt=e; }); installBtn.addEventListener('click',async()=>{ if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; }});
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=30'); load();
+function openAdmin(){ location.reload(); }
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js?v=31');
+load();
 </script>
 </body></html>
